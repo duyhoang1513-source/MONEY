@@ -1076,48 +1076,54 @@
         }
 
         function searchByPattern(pattern) {
-            const keyword = document.getElementById('searchSerial').value;
-            let results = [];
+    const keyword = document.getElementById('searchSerial').value;
+    let results = [];
 
-            switch(pattern) {
-                case 'repeat':
-                    for(let i = 1111; i <= 9999; i++) {
-                        const s = i.toString().padStart(4, '0') + i.toString().padStart(4, '0');
-                        if (keyword === '' || s.includes(keyword)) results.push(s);
-                    }
-                    break;
-                case 'radar':
-                    for(let i = 10001000; i <= 99998999; i++) {
-                        const s = i.toString();
-                        if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) {
-                            if (keyword === '' || s.includes(keyword)) results.push(s);
-                        }
-                    }
-                    break;
-                case 'lucky':
-                    const lucky = ['68', '86', '79', '39'];
-                    for(let i = 0; i < 1000000; i++) {
-                        const s = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
-                        if (lucky.some(l => s.endsWith(l))) results.push(s);
-                        if (results.length >= 20) break;
-                    }
-                    break;
-                case 'special':
-                    for(let i = 0; i < 100000000; i += 11111111) {
-                        results.push(i.toString().padStart(8, '0'));
-                    }
-                    break;
+    switch(pattern) {
+        case 'repeat':
+            for(let i = 1111; i <= 9999; i++) {
+                const s = i.toString().padStart(4, '0') + i.toString().padStart(4, '0');
+                if (keyword === '' || s.includes(keyword)) results.push(s);
+                if (results.length >= 10) break; // ✅ Giới hạn kết quả
             }
+            break;
 
-            results = results.slice(0, 10);
-            const html = results.map(r => `
-                <div class="flex justify-between items-center p-2 bg-white/5 rounded border border-white/10">
-                    <span class="font-bold text-blue-300">${r}</span>
-                    <button onclick="loadSearch('${r}')" class="text-xs text-blue-400 hover:text-blue-300">📍 Chọn</button>
-                </div>
-            `).join('');
-            document.getElementById('searchResults').innerHTML = html || '<p class="text-xs text-gray-600">Không tìm thấy</p>';
-        }
+        case 'radar':
+            for(let i = 10001000; i <= 99998999 && results.length < 10; i++) {
+                const s = i.toString();
+                if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) {
+                    if (keyword === '' || s.includes(keyword)) results.push(s);
+                }
+            }
+            break;
+
+        case 'lucky':
+            const lucky = ['68', '86', '79', '39'];
+            let count = 0;
+            while (results.length < 10 && count < 100000) {
+                const s = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+                if (lucky.some(l => s.endsWith(l))) results.push(s);
+                count++;
+            }
+            break;
+
+        case 'special':
+            // ✅ Sửa: Chỉ tạo những số "bát quý"
+            for(let digit = 0; digit <= 9 && results.length < 10; digit++) {
+                results.push(String(digit).repeat(8));
+            }
+            break;
+    }
+
+    results = [...new Set(results)].slice(0, 10); // ✅ Xóa trùng + giới hạn 10
+    const html = results.map(r => `
+        <div class="flex justify-between items-center p-2 bg-white/5 rounded border border-white/10">
+            <span class="font-bold text-blue-300">${r}</span>
+            <button onclick="loadSearch('${r}')" class="text-xs text-blue-400 hover:text-blue-300">📍 Chọn</button>
+        </div>
+    `).join('');
+    document.getElementById('searchResults').innerHTML = html || '<p class="text-xs text-gray-600">Không tìm thấy</p>';
+}
 
         function loadSearch(serial) {
             document.getElementById('serial').value = serial;
