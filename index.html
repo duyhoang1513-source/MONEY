@@ -977,7 +977,7 @@
             }
         }
 
-        function generateCertificate() {
+                function generateCertificate() {
             if (!currentResult) {
                 showNotification('Vui lòng thẩm định trước', 'error');
                 return;
@@ -1026,4 +1026,287 @@
             `;
             document.getElementById('certificateContent').innerHTML = html;
             document.getElementById('printCertBtn').style.display = 'block';
-            showNotification('✅
+            showNotification('✅ Chứng chỉ đã tạo');
+        }
+
+        function printCertificate() {
+            const certContent = document.getElementById('certificateContent').innerHTML;
+            const printWindow = window.open('', '', 'height=800,width=1000');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Chứng Chỉ Thẩm Định</title>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <style>
+                        body {
+                            font-family: 'Space Grotesk', sans-serif;
+                            background: white;
+                            color: #000;
+                            padding: 40px;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${certContent}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            setTimeout(() => printWindow.print(), 500);
+        }
+
+        // ========== ADVANCED FEATURES ==========
+        function randomSerial() {
+            const s = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+            document.getElementById('serial').value = s;
+            autoDetectType();
+            showNotification('🎲 Đã tạo seri ngẫu nhiên');
+        }
+
+        function searchByPattern(pattern) {
+            const keyword = document.getElementById('searchSerial').value;
+            let results = [];
+
+            switch(pattern) {
+                case 'repeat':
+                    for(let i = 1111; i <= 9999; i++) {
+                        const s = i.toString().padStart(4, '0') + i.toString().padStart(4, '0');
+                        if (keyword === '' || s.includes(keyword)) results.push(s);
+                    }
+                    break;
+                case 'radar':
+                    for(let i = 10001000; i <= 99998999; i++) {
+                        const s = i.toString();
+                        if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) {
+                            if (keyword === '' || s.includes(keyword)) results.push(s);
+                        }
+                    }
+                    break;
+                case 'lucky':
+                    const lucky = ['68', '86', '79', '39'];
+                    for(let i = 0; i < 1000000; i++) {
+                        const s = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+                        if (lucky.some(l => s.endsWith(l))) results.push(s);
+                        if (results.length >= 20) break;
+                    }
+                    break;
+                case 'special':
+                    for(let i = 0; i < 100000000; i += 11111111) {
+                        results.push(i.toString().padStart(8, '0'));
+                    }
+                    break;
+            }
+
+            results = results.slice(0, 10);
+            const html = results.map(r => `
+                <div class="flex justify-between items-center p-2 bg-white/5 rounded border border-white/10">
+                    <span class="font-bold text-blue-300">${r}</span>
+                    <button onclick="loadSearch('${r}')" class="text-xs text-blue-400 hover:text-blue-300">📍 Chọn</button>
+                </div>
+            `).join('');
+            document.getElementById('searchResults').innerHTML = html || '<p class="text-xs text-gray-600">Không tìm thấy</p>';
+        }
+
+        function loadSearch(serial) {
+            document.getElementById('serial').value = serial;
+            autoDetectType();
+            showNotification(`✅ Đã chọn: ${serial}`);
+        }
+
+        function calcSellPrice() {
+            const buy = parseFloat(document.getElementById('buyPrice').value);
+            const profit = parseFloat(document.getElementById('profitPercent').value);
+            if (isNaN(buy) || buy <= 0) {
+                showNotification('Vui lòng nhập giá mua', 'error');
+                return;
+            }
+            const sell = buy + (buy * profit / 100);
+            const result = `
+                <p class="text-xs">Giá mua: <span class="text-blue-300 font-bold">${Math.round(buy).toLocaleString()}đ</span></p>
+                <p class="text-xs">Lợi nhuận: <span class="text-green-400 font-bold">${profit}%</span></p>
+                <p class="text-sm font-bold text-green-400 mt-2">Giá bán: ${Math.round(sell).toLocaleString()}đ</p>
+            `;
+            document.getElementById('tradeResult').innerHTML = result;
+        }
+
+        function updateAbsoluteAnalysis() {
+            const rare = parseInt(document.getElementById('rareSlider').value);
+            const beautiful = parseInt(document.getElementById('beautifulSlider').value);
+            const luck = parseInt(document.getElementById('luckSlider').value);
+            
+            document.getElementById('rareValue').innerText = rare;
+            document.getElementById('beautifulValue').innerText = beautiful;
+            document.getElementById('luckValue').innerText = luck;
+
+            const score = (rare * 0.4 + beautiful * 0.35 + luck * 0.25) / 100;
+            const rating = score > 0.8 ? '🔥 Siêu Phẩm' : score > 0.6 ? '⭐ Tốt' : score > 0.4 ? '👍 Bình Thường' : '📄 Thường';
+            
+            document.getElementById('analysisResult').innerHTML = `
+                <p>Điểm: <span class="text-yellow-400 font-bold">${(score * 100).toFixed(1)}/100</span> ${rating}</p>
+            `;
+        }
+
+        function checkFakeSerial() {
+            const s = document.getElementById('checkFakeSerial').value;
+            if (s.length !== 8 || isNaN(s)) {
+                showNotification('Nhập đúng 8 chữ số', 'error');
+                return;
+            }
+            
+            // Kiểm tra tính hợp lệ cơ bản
+            const digitSum = s.split('').reduce((a, b) => a + parseInt(b), 0);
+            const lastDigit = parseInt(s[7]);
+            const checkDigit = digitSum % 10;
+            
+            const isFake = checkDigit !== lastDigit;
+            const result = `
+                <p class="text-sm ${isFake ? 'text-red-400' : 'text-green-400'} font-bold">
+                    ${isFake ? '⚠️ Nghi Ngờ Giả' : '✅ Có Thể Thật'}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">Kiểm tra cơ bản: Chữ số cuối là ${lastDigit}, mà tổng bằng ${digitSum}</p>
+            `;
+            document.getElementById('fakeCheckResult').innerHTML = result;
+        }
+
+        function addCompareRow() {
+            if (document.querySelectorAll('.comparison-card').length >= 5) {
+                showNotification('Tối đa 5 tờ', 'error');
+                return;
+            }
+            const card = document.createElement('div');
+            card.className = 'comparison-card';
+            card.innerHTML = `
+                <div class="flex gap-2 mb-3">
+                    <input type="text" placeholder="Seri" maxlength="8" class="input-style p-2 rounded-lg flex-1 text-sm">
+                    <input type="number" placeholder="Giá (đ)" class="input-style p-2 rounded-lg w-32 text-sm">
+                    <button onclick="removeCompare(this)" class="text-red-400 hover:text-red-600">❌</button>
+                </div>
+            `;
+            document.getElementById('compareList').appendChild(card);
+        }
+
+        function removeCompare(btn) {
+            btn.closest('.comparison-card').remove();
+        }
+
+        function exportStats() {
+            if (history.length === 0) {
+                showNotification('Không có dữ liệu để xuất', 'error');
+                return;
+            }
+            
+            let csv = 'Seri,Loại,Giá,Ngày\n';
+            history.forEach(h => {
+                csv += `${h.pre} ${h.ser},${h.typeName},${Math.round(h.price)},${h.date}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `valuator_stats_${new Date().getTime()}.csv`;
+            link.click();
+            showNotification('📥 Đã xuất CSV');
+        }
+
+        function backupData() {
+            const data = { history, favorites };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `valuator_backup_${new Date().getTime()}.json`;
+            link.click();
+            showNotification('💾 Đã lưu dữ liệu');
+        }
+
+        function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    history = data.history || [];
+                    favorites = data.favorites || [];
+                    saveData();
+                    updateHistoryUI();
+                    updateFavoritesUI();
+                    showNotification('✅ Đã phục hồi dữ liệu');
+                } catch {
+                    showNotification('Lỗi file backup', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetAll() {
+            if (confirm('CẢNH BÁO: Điều này sẽ xóa TẤT CẢ dữ liệu! Bạn chắc chắn?')) {
+                history = [];
+                favorites = [];
+                currentResult = null;
+                saveData();
+                updateHistoryUI();
+                updateFavoritesUI();
+                document.getElementById('idleState').classList.remove('hidden');
+                document.getElementById('activeState').classList.add('hidden');
+                showNotification('🔄 Đã reset hệ thống');
+            }
+        }
+
+        function predictPrice() {
+            const price = parseFloat(document.getElementById('predictPrice').value);
+            if (isNaN(price) || price <= 0) {
+                showNotification('Nhập giá hợp lệ', 'error');
+                return;
+            }
+            
+            const trend = Math.random() * 30 - 10; // -10% đến +20%
+            const predicted = price * (1 + trend / 100);
+            const direction = trend > 0 ? '📈 Tăng' : '📉 Giảm';
+            
+            document.getElementById('predictionResult').innerHTML = `
+                <p class="text-xs">Giá hiện tại: <span class="text-blue-300 font-bold">${Math.round(price).toLocaleString()}đ</span></p>
+                <p class="text-sm mt-2 font-bold text-yellow-400">${direction} ${Math.abs(trend).toFixed(1)}%</p>
+                <p class="text-sm font-bold text-green-400">Dự báo: ${Math.round(predicted).toLocaleString()}đ</p>
+                <p class="text-xs text-gray-500 mt-2 italic">*Dự báo mang tính tham khảo</p>
+            `;
+        }
+
+        // ========== ANALYTICS ==========
+        function updateAnalytics() {
+            const total = history.length;
+            const sumPrice = history.reduce((a, b) => a + b.price, 0);
+            const avg = total > 0 ? sumPrice / total : 0;
+            const rare = history.filter(h => h.typeId !== 'normal').length;
+
+            document.getElementById('totalValuations').innerText = total;
+            document.getElementById('totalValue').innerText = Math.round(sumPrice).toLocaleString() + 'đ';
+            document.getElementById('avgValue').innerText = Math.round(avg).toLocaleString() + 'đ';
+            document.getElementById('rareCount').innerText = rare;
+
+            // Top 10
+            const sorted = [...history].sort((a, b) => b.price - a.price);
+            const topHtml = sorted.slice(0, 10).map((h, i) => `
+                <div class="flex justify-between text-xs p-2 bg-white/5 rounded">
+                    <span>${i + 1}. ${h.pre} ${h.ser}</span>
+                    <span class="text-green-400 font-bold">${Math.round(h.price).toLocaleString()}đ</span>
+                </div>
+            `).join('');
+            document.getElementById('topList').innerHTML = topHtml || '<p class="text-xs text-gray-600">Chưa có dữ liệu</p>';
+        }
+
+        // ========== INIT ==========
+        window.addEventListener('load', () => {
+            initData();
+            updateAnalytics();
+            updateAbsoluteAnalysis();
+        });
+    </script>
+</body>
+</html>
