@@ -3,36 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Định Giá Tiền Số Đẹp v3.0 - Duy Collector</title>
+    <title>Định Giá Tiền Số Đẹp v3.5 - Duy Collector</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Space Grotesk', sans-serif; background: #050505; color: #fff; }
         .glass-card { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(15px); border: 1px solid #333; }
-        .input-style { background: #111; border: 1px solid #444; transition: 0.3s; }
+        .input-style { background: #111; border: 1px solid #444; transition: 0.3s; color: white; }
         .input-style:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
         .glow-button { background: linear-gradient(45deg, #2563eb, #7c3aed); transition: 0.5s; }
         .glow-button:hover { box-shadow: 0 0 20px rgba(124, 58, 237, 0.6); transform: translateY(-2px); }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
+<body class="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
 
-    <div class="glass-card max-w-2xl w-full p-10 rounded-[2rem] shadow-2xl">
-        <h1 class="text-4xl font-bold text-center mb-1 tracking-tighter">PREMIUM VALUATOR</h1>
-        <p class="text-blue-400 text-center text-xs font-bold uppercase tracking-widest mb-10">AI-Powered Currency Grading</p>
+    <div class="glass-card max-w-4xl w-full p-10 rounded-[2rem] shadow-2xl">
+        <h1 class="text-4xl font-bold text-center mb-1 tracking-tighter uppercase">Premium Valuator <span class="text-blue-500 text-xl">v3.5</span></h1>
+        <p class="text-blue-400 text-center text-xs font-bold uppercase tracking-widest mb-10">Hệ thống thẩm định số đẹp chuyên sâu</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-5">
                 <div>
-                    <label class="text-xs text-gray-400 font-bold mb-2 block">TIỀN TỆ & MỆNH GIÁ</label>
-                    <div class="flex gap-2">
-                        <select id="currency" class="input-style p-3 rounded-xl w-24 outline-none">
-                            <option value="VND">VNĐ</option>
-                            <option value="USD">USD</option>
-                            <option value="EUR">EUR</option>
-                        </select>
-                        <input type="number" id="deno" placeholder="Mệnh giá..." class="input-style p-3 rounded-xl flex-1 outline-none">
-                    </div>
+                    <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Mệnh giá (VNĐ)</label>
+                    <select id="deno" class="input-style p-3 rounded-xl w-full outline-none">
+                        <option value="1000">1.000</option>
+                        <option value="2000">2.000</option>
+                        <option value="5000">5.000</option>
+                        <option value="10000">10.000</option>
+                        <option value="20000">20.000</option>
+                        <option value="50000">50.000</option>
+                        <option value="100000">100.000</option>
+                        <option value="200000">200.000</option>
+                        <option value="500000">500.000</option>
+                    </select>
                 </div>
 
                 <div>
@@ -44,88 +47,117 @@
                 </div>
 
                 <div>
-                    <label class="text-xs text-gray-400 font-bold mb-2 block">TÌNH TRẠNG (GRADE)</label>
+                    <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Tình trạng (Grade)</label>
                     <select id="condition" class="input-style p-3 rounded-xl w-full outline-none">
-                        <option value="1.0">UNC (10/10 - Mới tinh)</option>
-                        <option value="0.7">XF/VF (8/10 - Hơi cũ)</option>
-                        <option value="0.3">F/G (4/10 - Nhàu/Rách)</option>
+                        <option value="1.0">UNC (10/10 - Mới nguyên bản)</option>
+                        <option value="0.7">XF/VF (8/10 - Có nếp gấp nhẹ)</option>
+                        <option value="0.3">F/G (4/10 - Cũ/Mềm/Bẩn)</option>
                     </select>
                 </div>
 
-                <button onclick="checkValuation()" class="glow-button w-full p-4 rounded-2xl font-bold text-white mt-4 uppercase">Thẩm Định Giá Trị</button>
+                <button onclick="checkValuation()" class="glow-button w-full p-4 rounded-2xl font-bold text-white mt-4 uppercase">Thẩm Định Ngay</button>
             </div>
 
-            <div id="resultArea" class="bg-black/50 rounded-2xl p-6 border border-dashed border-gray-700 flex flex-col justify-center items-center text-center">
+            <div id="resultArea" class="bg-black/50 rounded-2xl p-6 border border-gray-700 flex flex-col justify-center items-center text-center relative overflow-hidden">
                 <div id="idleState">
-                    <p class="text-gray-500 italic text-sm">Nhập thông tin để xem định giá...</p>
+                    <p class="text-gray-500 italic text-sm">Chờ dữ liệu...</p>
                 </div>
-                <div id="activeState" class="hidden w-full">
+                
+                <div id="activeState" class="hidden w-full space-y-4">
                     <span id="rankLabel" class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase"></span>
-                    <h2 class="text-5xl font-bold my-4 text-white" id="finalVal"></h2>
-                    <div class="text-left bg-white/5 p-4 rounded-xl space-y-2">
+                    <h2 class="text-5xl font-bold text-white" id="finalVal"></h2>
+                    
+                    <div class="text-left bg-white/5 p-4 rounded-xl space-y-2 border border-white/10">
                         <p class="text-xs"><span class="text-gray-400">Dạng số:</span> <span id="typeName" class="text-blue-300 font-bold"></span></p>
                         <p class="text-xs"><span class="text-gray-400">Độ hiếm:</span> <span id="rarityScore" class="text-yellow-500 font-bold"></span></p>
-                        <p class="text-[10px] text-gray-500 leading-tight border-t border-gray-800 pt-2 mt-2" id="expertNote"></p>
+                        <p class="text-[10px] text-gray-500 leading-tight border-t border-gray-800 pt-2 mt-2 italic" id="expertNote"></p>
                     </div>
+
+                    <button onclick="window.print()" class="text-[10px] text-gray-400 hover:text-white underline mt-2">Xuất chứng chỉ số</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="glass-card max-w-4xl w-full p-6 rounded-2xl">
+        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Lịch sử thẩm định gần đây</h3>
+        <div id="historyList" class="space-y-2">
+            <p class="text-xs text-gray-600">Chưa có lịch sử.</p>
+        </div>
+    </div>
+
     <script>
+        let history = [];
+
         function checkValuation() {
-            const deno = parseFloat(document.getElementById('deno').value) || 0;
+            const deno = parseFloat(document.getElementById('deno').value);
+            const prefix = document.getElementById('prefix').value.toUpperCase() || "XX";
             const s = document.getElementById('serial').value;
             const cond = parseFloat(document.getElementById('condition').value);
-            const cur = document.getElementById('currency').value;
 
-            if (s.length < 8) { alert("Vui lòng nhập đủ 8 chữ số!"); return; }
+            if (s.length < 8 || isNaN(s)) { alert("Số seri phải đủ 8 chữ số!"); return; }
 
             let multiplier = 1;
             let type = "Số thường";
             let rarity = "Phổ thông";
-            let note = "Tờ tiền này có giá trị lưu thông bình thường.";
+            let note = "Giá trị lưu thông thông thường.";
 
-            // LOGIC NHẬN DIỆN SỐ ĐẸP
-            if (/^(\d)\1{7}$/.test(s)) { // Bát quý
-                multiplier = 500; type = "Bát Quý"; rarity = "Cực phẩm (1/100tr)";
-                note = "Vua của các loại số đẹp. Giá trị cực cao trên mọi thị trường.";
-            } else if (/(\d)\1{6}/.test(s)) { // Thất quý
-                multiplier = 100; type = "Thất Quý"; rarity = "Siêu hiếm";
-                note = "Chỉ đứng sau bát quý. Rất được săn đón.";
-            } else if (/(\d)\1{5}/.test(s)) { // Lục quý
-                multiplier = 30; type = "Lục Quý"; rarity = "Hiếm";
-            } else if (s === "12345678" || s === "23456789" || s === "01234567") { // Sảnh rồng
-                multiplier = 200; type = "Sảnh Rồng"; rarity = "Đại cát";
-                note = "Biểu tượng của sự thăng tiến không ngừng.";
-            } else if (s.slice(0,4) === s.slice(4,8)) { // Tứ quý kép (VD: 22224444)
-                multiplier = 40; type = "Tứ Quý Kép"; rarity = "Hiếm";
-            } else if (s.slice(0,2) === s.slice(2,4) && s.slice(4,6) === s.slice(6,8) && s.slice(0,2) === s.slice(4,6)) { // Bát quý lặp
-                multiplier = 20; type = "Bát Quý Lặp (Như tờ 24242424)"; rarity = "Rất hiếm";
-                note = "Sự lặp lại hoàn hảo. Đặc biệt quý giá nếu gắn với năm phát hành.";
-            } else if (/(\d)\1{3}$/.test(s)) { // Tứ quý cuối
-                multiplier = 5; type = "Tứ Quý Đuôi"; rarity = "Khá";
-            } else if (/(\d)\1{2}$/.test(s)) { // Tam hoa cuối
-                multiplier = 1.5; type = "Tam Hoa Đuôi"; rarity = "Phổ thông+";
-            } else if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) { // Số Gánh/Đối (Radar)
-                multiplier = 10; type = "Số Gánh Đối (Radar)"; rarity = "Sưu tầm";
-                note = "Số đọc xuôi hay ngược đều giống nhau, cực kỳ cân bằng.";
+            // LOGIC NHẬN DIỆN MỞ RỘNG
+            const isBirthday = (str) => {
+                const day = parseInt(str.slice(0,2));
+                const month = parseInt(str.slice(2,4));
+                const year = parseInt(str.slice(4,8));
+                return (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= 2026);
+            };
+
+            if (/^(\d)\1{7}$/.test(s)) { 
+                multiplier = 800; type = "Bát Quý"; rarity = "Cực phẩm";
+                note = "Vua của các loại số đẹp. Cực kỳ giá trị.";
+            } else if (/(\d)\1{6}/.test(s)) { 
+                multiplier = 150; type = "Thất Quý"; rarity = "Siêu hiếm";
+            } else if (s === "12345678" || s === "23456789") { 
+                multiplier = 300; type = "Sảnh Rồng"; rarity = "Tuyệt phẩm";
+            } else if (isBirthday(s)) {
+                multiplier = 15; type = "Số Ngày Sinh"; rarity = "Kỷ niệm";
+                note = "Trùng khớp hoàn toàn với một ngày trong lịch sử.";
+            } else if (/(6868|8686|7979|3939)$/.test(s)) {
+                multiplier = 12; type = "Lộc Phát/Thần Tài Kép"; rarity = "Phong thủy cao";
+            } else if (/(68|86|79|39)$/.test(s)) {
+                multiplier = 2.5; type = "Số Tài Lộc"; rarity = "Dân chơi";
+            } else if (s.slice(0,4) === s.slice(4,8)) {
+                multiplier = 30; type = "Số Lặp (Repeat)"; rarity = "Sưu tầm";
+            } else if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) {
+                multiplier = 20; type = "Số Gánh (Radar)"; rarity = "Hiếm";
             }
 
-            // TÍNH GIÁ CUỐI
-            let finalPrice = deno;
-            if (type !== "Số thường") {
-                finalPrice = deno + (deno * multiplier * cond);
-            }
-
-            // HIỂN THỊ
+            // TÍNH GIÁ (Logic: Số đẹp + Giá trị sưu tầm)
+            let finalPrice = type === "Số thường" ? deno : (deno + (deno * multiplier * cond));
+            
+            // CẬP NHẬT GIAO DIỆN
             document.getElementById('idleState').classList.add('hidden');
             document.getElementById('activeState').classList.remove('hidden');
-            document.getElementById('finalVal').innerText = Math.round(finalPrice).toLocaleString();
+            document.getElementById('finalVal').innerText = Math.round(finalPrice).toLocaleString() + "đ";
             document.getElementById('rankLabel').innerText = type !== "Số thường" ? "Collectible" : "Common";
             document.getElementById('typeName').innerText = type;
             document.getElementById('rarityScore').innerText = rarity;
             document.getElementById('expertNote').innerText = note;
+
+            // LƯU LỊCH SỬ
+            addToHistory(prefix, s, finalPrice, type);
+        }
+
+        function addToHistory(pre, ser, price, type) {
+            const list = document.getElementById('historyList');
+            const item = { pre, ser, price, type };
+            history.unshift(item);
+            if(history.length > 5) history.pop();
+
+            list.innerHTML = history.map(i => `
+                <div class="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-lg border border-white/5">
+                    <span><b class="text-blue-400">${i.pre} ${i.ser}</b> - ${i.type}</span>
+                    <span class="font-bold text-green-400">${Math.round(i.price).toLocaleString()}đ</span>
+                </div>
+            `).join('');
         }
     </script>
 </body>
