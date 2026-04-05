@@ -1325,5 +1325,124 @@
             updateAbsoluteAnalysis();
         });
     </script>
+                <script>
+    // 1. XỬ LÝ CHUYỂN TAB
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // 2. HÀM TẠO SỐ NGẪU NHIÊN (RANDOM)
+    function randomSerial() {
+        const r = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+        document.getElementById('serial').value = r;
+        showNotification("🎲 Đã tạo số ngẫu nhiên!");
+    }
+
+    // 3. THUẬT TOÁN THẨM ĐỊNH CHÍNH
+    function checkValuation() {
+        const deno = parseInt(document.getElementById('deno').value);
+        const s = document.getElementById('serial').value;
+        const cond = parseFloat(document.getElementById('condition').value);
+
+        if (s.length !== 8 || isNaN(s)) {
+            showNotification("⚠️ Vui lòng nhập đúng 8 chữ số seri!");
+            return;
+        }
+
+        let multiplier = 1;
+        let type = "Số thường";
+        let rarity = "Phổ thông";
+        let note = "Tờ tiền có giá trị lưu thông bình thường.";
+
+        // Logic kiểm tra các dạng số đẹp
+        if (/^(\d)\1{7}$/.test(s)) {
+            multiplier = 800; type = "Bát Quý"; rarity = "Cực hiếm (Legendary)";
+            note = "Vua của các loại số đẹp. Giá trị sưu tầm cực cao.";
+        } else if (/^(\d)\1{6}/.test(s) || /(\d)\1{6}$/.test(s)) {
+            multiplier = 150; type = "Thất Quý"; rarity = "Siêu hiếm";
+        } else if (s === "12345678" || s === "23456789" || s === "01234567") {
+            multiplier = 300; type = "Sảnh Rồng"; rarity = "Tuyệt phẩm";
+        } else if (s.slice(0, 4) === s.slice(4)) {
+            multiplier = 30; type = "Số Lặp (Repeat)"; rarity = "Hiếm";
+        } else if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) {
+            multiplier = 20; type = "Số Gánh Đối (Radar)"; rarity = "Sưu tầm";
+        } else if (/(68|86|79|39)$/.test(s)) {
+            multiplier = 3; type = "Số Tài Lộc / Thần Tài"; rarity = "Khá";
+            note = "Mang ý nghĩa may mắn, rất được ưa chuộng trong kinh doanh.";
+        } else if (/(\d{2})\1{3}/.test(s)) {
+            multiplier = 10; type = "Số Cặp"; rarity = "Trung bình";
+        }
+
+        let finalPrice = deno + (deno * multiplier * cond);
+        if (multiplier === 1) finalPrice = deno; // Nếu là số thường thì giữ nguyên mệnh giá
+
+        // Hiển thị kết quả
+        document.getElementById('idleState').classList.add('hidden');
+        const activeState = document.getElementById('activeState');
+        activeState.classList.remove('hidden');
+
+        document.getElementById('finalVal').innerText = Math.round(finalPrice).toLocaleString() + "đ";
+        document.getElementById('typeName').innerText = type;
+        document.getElementById('rarityScore').innerText = rarity;
+        document.getElementById('priceIncrease').innerText = "x" + (multiplier * cond).toFixed(1);
+        document.getElementById('expertNote').innerText = note;
+        document.getElementById('rankLabel').innerText = multiplier > 1 ? "COLLECTIBLE" : "COMMON";
+
+        saveHistory(s, type, finalPrice);
+    }
+
+    // 4. LỊCH SỬ THẨM ĐỊNH
+    let history = [];
+    function saveHistory(serial, type, price) {
+        history.unshift({ serial, type, price });
+        if (history.length > 10) history.pop();
+        updateHistoryUI();
+    }
+
+    function updateHistoryUI() {
+        const container = document.getElementById('historyList');
+        container.innerHTML = history.map(h => `
+            <div class="flex justify-between text-[10px] bg-white/5 p-2 rounded border border-white/10">
+                <span>Seri: <b class="text-blue-400">${h.serial}</b> (${h.type})</span>
+                <span class="text-green-400 font-bold">${h.price.toLocaleString()}đ</span>
+            </div>
+        `).join('');
+    }
+
+    function clearHistory() {
+        history = [];
+        document.getElementById('historyList').innerHTML = '<p class="text-xs text-gray-600">Chưa có lịch sử.</p>';
+    }
+
+    // 5. THÔNG BÁO (NOTIFICATION)
+    function showNotification(msg) {
+        const n = document.getElementById('notification');
+        n.innerText = msg;
+        n.style.display = 'block';
+        setTimeout(() => { n.style.display = 'none'; }, 3000);
+    }
+
+    // 6. CÁC HÀM PHỤ TRỢ KHÁC
+    function toggleExpand(btn) {
+        btn.nextElementSibling.classList.toggle('active');
+        btn.innerText = btn.innerText.includes('▶') ? btn.innerText.replace('▶', '▼') : btn.innerText.replace('▼', '▶');
+    }
+
+    function copyResult() {
+        const val = document.getElementById('finalVal').innerText;
+        const serial = document.getElementById('serial').value;
+        navigator.clipboard.writeText(`Thẩm định seri ${serial}: ${val}`).then(() => {
+            showNotification("📋 Đã chép kết quả!");
+        });
+    }
+</script>
 </body>
 </html>
