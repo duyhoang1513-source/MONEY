@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valuator v4.3 Zenith - Duy Collector</title>
+    <title>Valuator v4.4 Apex - Duy Collector</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
@@ -20,6 +20,7 @@
         .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .notification { position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; padding: 1rem; border-radius: 12px; z-index: 1000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .rare-item { background: rgba(255,255,255,0.03); border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0 12px 12px 0; }
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center">
@@ -29,11 +30,12 @@
     <div class="glass-card max-w-6xl w-full p-6 md:p-10 rounded-[2.5rem] shadow-2xl">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-                <h1 class="text-4xl font-bold uppercase tracking-tighter">Valuator <span class="text-blue-500">v4.3 Zenith</span></h1>
-                <p class="text-gray-500 text-xs font-bold tracking-widest uppercase">Multi-Currency & Rare Serial Engine • Duy Collector</p>
+                <h1 class="text-4xl font-bold uppercase tracking-tighter">Valuator <span class="text-blue-500">v4.4 Apex</span></h1>
+                <p class="text-gray-500 text-xs font-bold tracking-widest uppercase">Expert Engine & Knowledge Base • Duy Collector</p>
             </div>
-            <div class="flex bg-white/5 p-1 rounded-xl border border-white/10">
+            <div class="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto">
                 <button class="tab-btn active" onclick="openTab(event, 'main')">💎 Định Giá</button>
+                <button class="tab-btn" onclick="openTab(event, 'knowledge')">📚 Tra Cứu Số</button>
                 <button class="tab-btn" onclick="openTab(event, 'stats')">📊 Thống Kê</button>
                 <button class="tab-btn" onclick="openTab(event, 'info')">🌐 Tỷ Giá</button>
             </div>
@@ -62,80 +64,103 @@
                         </div>
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Mệnh Giá</label>
-                            <select id="deno" class="input-style p-4 rounded-2xl w-full font-bold">
-                                </select>
+                            <select id="deno" class="input-style p-4 rounded-2xl w-full font-bold"></select>
                         </div>
                     </div>
-
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Số Seri (8 Ký Tự Số)</label>
-                        <input type="text" id="serial" placeholder="00000000" maxlength="8" 
-                               class="input-style p-5 rounded-2xl w-full text-center text-2xl font-bold tracking-[0.3em] text-blue-400">
+                        <input type="text" id="serial" placeholder="00000000" maxlength="8" class="input-style p-5 rounded-2xl w-full text-center text-2xl font-bold tracking-[0.3em] text-blue-400">
                     </div>
-
                     <div>
-                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Tình Trạng Tờ Tiền (Grade)</label>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Grade</label>
                         <div class="grid grid-cols-3 gap-2">
                             <button onclick="setGrade(1.0, this)" class="grade-btn border border-white/10 p-3 rounded-xl bg-blue-600 font-bold text-xs">UNC (10/10)</button>
-                            <button onclick="setGrade(0.6, this)" class="grade-btn border border-white/10 p-3 rounded-xl bg-white/5 hover:bg-white/10 font-bold text-xs">AUNC (7/10)</button>
-                            <button onclick="setGrade(0.2, this)" class="grade-btn border border-white/10 p-3 rounded-xl bg-white/5 hover:bg-white/10 font-bold text-xs">Used (3/10)</button>
+                            <button onclick="setGrade(0.6, this)" class="grade-btn border border-white/10 p-3 rounded-xl bg-white/5 font-bold text-xs">AUNC (7/10)</button>
+                            <button onclick="setGrade(0.2, this)" class="grade-btn border border-white/10 p-3 rounded-xl bg-white/5 font-bold text-xs">Used (3/10)</button>
                         </div>
                     </div>
-
                     <div class="flex gap-3">
-                        <button onclick="analyze()" class="glow-button flex-1 p-5 rounded-2xl font-bold uppercase tracking-wider">Thẩm Định Ngay</button>
+                        <button onclick="analyze()" class="glow-button flex-1 p-5 rounded-2xl font-bold uppercase">Thẩm Định Ngay</button>
                         <button onclick="randomSerial()" class="bg-white/5 border border-white/10 p-5 rounded-2xl hover:bg-white/10 transition">🎲</button>
                     </div>
                 </div>
 
-                <div class="relative bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10 rounded-[2rem] p-8 flex flex-col justify-center items-center overflow-hidden">
+                <div class="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-white/10 rounded-[2rem] p-8 flex flex-col justify-center items-center">
                     <div id="idleState" class="text-center">
                         <div class="w-20 h-20 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p class="text-gray-500 animate-pulse uppercase text-[10px] font-bold tracking-widest">Hệ thống sẵn sàng</p>
+                        <p class="text-gray-500 font-bold tracking-widest text-[10px]">READY TO SCAN</p>
                     </div>
-
                     <div id="activeState" class="hidden w-full text-center space-y-6">
                         <div id="rankBadge" class="inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-blue-600">Common</div>
-                        <div class="space-y-1">
-                            <h2 class="text-6xl font-bold tracking-tighter" id="resPrice">0</h2>
-                            <p class="text-gray-400 text-sm font-bold uppercase" id="resCurrency">VNĐ</p>
-                        </div>
+                        <h2 class="text-6xl font-bold tracking-tighter" id="resPrice">0</h2>
+                        <p class="text-gray-400 text-sm font-bold uppercase" id="resCurrency">VNĐ</p>
                         <div class="p-4 bg-black/40 rounded-2xl border border-white/5 text-left">
                             <p class="text-blue-400 font-bold text-lg" id="resType">--</p>
                             <p class="text-gray-500 text-xs mt-2 leading-relaxed" id="resNote">--</p>
                         </div>
-                        <div class="text-[10px] text-gray-600 italic">Giá trị quy đổi xấp xỉ dựa trên độ hiếm và thị trường sưu tầm.</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="knowledge" class="tab-content">
+            <h3 class="text-xl font-bold mb-6 text-blue-400">Từ Điển Số Đẹp Dành Cho Dân Sưu Tầm</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[500px] pr-2">
+                <div class="rare-item">
+                    <h4 class="font-bold text-blue-300">👑 Bát Quý (Solid Serial)</h4>
+                    <p class="text-xs text-gray-400 mt-1">8 số giống hệt nhau (VD: 88888888). Đây là loại quý hiếm nhất. Tỷ lệ xuất hiện cực thấp, giá trị có thể gấp hàng ngàn lần mệnh giá gốc.</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Hệ số: x1000</span>
+                </div>
+                <div class="rare-item" style="border-color: #a855f7;">
+                    <h4 class="font-bold text-purple-300">🐉 Sảnh Rồng (Ladder)</h4>
+                    <p class="text-xs text-gray-400 mt-1">Dãy số tiến liên tục 8 chữ số (VD: 12345678). Tượng trưng cho sự thăng tiến không ngừng trong sự nghiệp.</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Hệ số: x300</span>
+                </div>
+                <div class="rare-item" style="border-color: #22c55e;">
+                    <h4 class="font-bold text-green-300">🎂 Ngày Sinh (Birthday Note)</h4>
+                    <p class="text-xs text-gray-400 mt-1">8 số trùng khớp với định dạng DD-MM-YYYY. Rất được ưa chuộng làm quà tặng cá nhân hoặc kỷ niệm.</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Hệ số: x20</span>
+                </div>
+                <div class="rare-item" style="border-color: #ef4444;">
+                    <h4 class="font-bold text-red-300">🪞 Số Soi Gương (Palindrome)</h4>
+                    <p class="text-xs text-gray-400 mt-1">Số đối xứng, đọc xuôi hay ngược đều giống nhau (VD: 12344321). Mang lại sự cân bằng, hài hòa.</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Hệ số: x15</span>
+                </div>
+                <div class="rare-item" style="border-color: #f59e0b;">
+                    <h4 class="font-bold text-yellow-300">🔄 Số Lặp (Repeat)</h4>
+                    <p class="text-xs text-gray-400 mt-1">Gồm 2 cụm 4 số giống nhau hoàn toàn (VD: 12341234). Tạo hiệu ứng thị giác mạnh và dễ nhớ.</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Hệ số: x10</span>
+                </div>
+                <div class="rare-item" style="border-color: #06b6d4;">
+                    <h4 class="font-bold text-cyan-300">🍀 Lộc Phát / Thần Tài</h4>
+                    <p class="text-xs text-gray-400 mt-1">Kết thúc bằng các cặp số phong thủy như 68 (Lộc Phát), 86, 79 (Thần Tài lớn), 39 (Thần Tài nhỏ).</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Hệ số: x2-x5</span>
                 </div>
             </div>
         </div>
 
         <div id="stats" class="tab-content">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/10">
-                    <p class="text-gray-500 text-[10px] font-bold uppercase">Tổng lượt check</p>
-                    <h3 class="text-3xl font-bold" id="statTotalCheck">0</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">Tổng lượt check</p>
+                    <h3 id="statTotalCheck" class="text-2xl font-bold">0</h3>
                 </div>
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/10">
-                    <p class="text-gray-500 text-[10px] font-bold uppercase">Tờ quý nhất</p>
-                    <h3 class="text-3xl font-bold text-yellow-500" id="statMax">0đ</h3>
+                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">Tờ quý nhất (VNĐ)</p>
+                    <h3 id="statMax" class="text-2xl font-bold text-yellow-500">0đ</h3>
                 </div>
             </div>
-            <div class="h-64 glass-card p-6 rounded-[2rem]">
-                <canvas id="myChart"></canvas>
-            </div>
+            <div class="h-64"><canvas id="myChart"></canvas></div>
         </div>
 
         <div id="info" class="tab-content">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="rateGrid">
-                </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="rateGrid"></div>
         </div>
     </div>
 
-    <div class="max-w-6xl w-full mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="historyList"></div>
+    <div class="max-w-6xl w-full mt-6 grid grid-cols-1 md:grid-cols-3 gap-4" id="historyList"></div>
 
     <script>
-        // --- DATA ---
         const rates = { VND: 1, USD: 25400, EUR: 27500, JPY: 165, KRW: 19, CNY: 3500, GBP: 32000, SGD: 19000, THB: 700, LAK: 1.2, KHR: 6, AUD: 16500 };
         const denos = {
             VND: [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000],
@@ -152,115 +177,67 @@
             AUD: [5, 10, 20, 50, 100]
         };
 
-        let currentGrade = 1.0;
-        let history = [];
-        let maxVal = 0;
+        let currentGrade = 1.0, history = [], maxVal = 0, chart = null;
 
-        // --- CORE FUNCTIONS ---
         function updateDenominations() {
             const cur = document.getElementById('currency').value;
             const select = document.getElementById('deno');
             select.innerHTML = denos[cur].map(v => `<option value="${v}">${v.toLocaleString()} ${cur}</option>`).join('');
-            
-            // Cập nhật bảng tỷ giá
             const grid = document.getElementById('rateGrid');
-            grid.innerHTML = Object.keys(rates).map(key => `
-                <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center">
-                    <p class="text-gray-500 text-[10px] uppercase">${key}</p>
-                    <p class="font-bold text-xs">≈ ${rates[key].toLocaleString()} VNĐ</p>
-                </div>
-            `).join('');
+            grid.innerHTML = Object.keys(rates).map(key => `<div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center"><p class="text-gray-500 text-[10px] uppercase">${key}</p><p class="font-bold text-xs">≈ ${rates[key].toLocaleString()} VNĐ</p></div>`).join('');
         }
 
         function setGrade(val, btn) {
             currentGrade = val;
-            document.querySelectorAll('.grade-btn').forEach(b => {
-                b.classList.remove('bg-blue-600');
-                b.classList.add('bg-white/5');
-            });
-            btn.classList.remove('bg-white/5');
-            btn.classList.add('bg-blue-600');
+            document.querySelectorAll('.grade-btn').forEach(b => { b.classList.remove('bg-blue-600'); b.classList.add('bg-white/5'); });
+            btn.classList.remove('bg-white/5'); btn.classList.add('bg-blue-600');
         }
 
         function analyze() {
-            const cur = document.getElementById('currency').value;
-            const deno = parseInt(document.getElementById('deno').value);
-            const s = document.getElementById('serial').value;
+            const cur = document.getElementById('currency').value, deno = parseInt(document.getElementById('deno').value), s = document.getElementById('serial').value;
+            if (s.length !== 8 || isNaN(s)) { notify("❌ Seri phải là 8 chữ số!"); return; }
 
-            if (s.length !== 8 || isNaN(s)) {
-                notify("❌ Seri phải là 8 chữ số!");
-                return;
-            }
+            let mult = 1, type = "Số thường", note = "Giá trị giao dịch bình thường.";
+            if (/^(\d)\1{7}$/.test(s)) { mult = 1000; type = "Bát Quý (Vua)"; note = "Đỉnh cao sưu tầm. Hiếm có khó tìm."; }
+            else if ("0123456789".includes(s) || "9876543210".includes(s)) { mult = 300; type = "Sảnh Rồng"; note = "Sự thăng tiến hoàn hảo."; }
+            else if (isValidDate(s)) { mult = 20; type = "Ngày Sinh (Full)"; note = "Trùng khớp một mốc thời gian thực tế."; }
+            else if (s === s.split('').reverse().join('')) { mult = 15; type = "Số Soi Gương"; note = "Sự cân bằng tuyệt đối."; }
+            else if (/^(\d)\1{6}/.test(s) || /(\d)\1{6}$/.test(s)) { mult = 150; type = "Thất Quý"; note = "Cực hiếm, chỉ thua Bát Quý."; }
+            else if (s.slice(0, 4) === s.slice(4)) { mult = 10; type = "Số Lặp (Repeat)"; note = "Hai cụm số giống hệt nhau."; }
+            else if (/(\d)\1{3}$/.test(s)) { mult = 5; type = "Tứ Quý Đuôi"; note = "Dễ sưu tầm và thanh khoản."; }
+            else if (/(68|86|79|39)$/.test(s)) { mult = 2.5; type = "Lộc Phát / Thần Tài"; note = "May mắn, phong thủy tốt."; }
 
-            let mult = 1;
-            let type = "Số thường";
-            let note = "Tờ tiền có giá trị giao dịch bình thường.";
-
-            // Logic nhận diện (Giữ nguyên và tối ưu)
-            if (/^(\d)\1{7}$/.test(s)) { mult = 1000; type = "Bát Quý (Vua)"; note = "Đỉnh cao sưu tầm. Tỷ lệ 1/100.000.000 tờ."; }
-            else if ("0123456789".includes(s) || "9876543210".includes(s)) { mult = 300; type = "Sảnh Rồng"; note = "Chuỗi số tiến/lùi hoàn hảo."; }
-            else if (isValidDate(s)) { mult = 20; type = "Ngày Sinh (Full)"; note = "Trùng khớp ngày/tháng/năm thực tế."; }
-            else if (s === s.split('').reverse().join('')) { mult = 15; type = "Số Soi Gương"; note = "Đọc xuôi hay ngược đều giống nhau."; }
-            else if (/^(\d)\1{6}/.test(s) || /(\d)\1{6}$/.test(s)) { mult = 150; type = "Thất Quý"; note = "Cực kỳ hiếm, chỉ sau Bát Quý."; }
-            else if (s.slice(0, 4) === s.slice(4)) { mult = 10; type = "Số Lặp (Repeat)"; note = "Hai cụm 4 số giống hệt nhau."; }
-            else if (/(\d)\1{3}$/.test(s)) { mult = 5; type = "Tứ Quý Đuôi"; note = "Bốn số cuối trùng nhau."; }
-            else if (/(68|86|79|39)$/.test(s)) { mult = 2; type = "Lộc Phát / Thần Tài"; note = "Mang ý nghĩa may mắn, phong thủy."; }
-            else if (parseInt(s.slice(4)) >= 1950 && parseInt(s.slice(4)) <= 2026) { mult = 2; type = "Năm Sinh"; note = "Phù hợp làm quà tặng cá nhân."; }
-
-            // Tính giá (Gốc + (Gốc * Hệ số * Tình trạng))
             const collectValue = mult === 1 ? deno : (deno + (deno * mult * currentGrade));
             const valueVnd = collectValue * rates[cur];
-
-            // Update UI
-            document.getElementById('idleState').classList.add('hidden');
-            const active = document.getElementById('activeState');
-            active.classList.remove('hidden');
             
+            document.getElementById('idleState').classList.add('hidden');
+            document.getElementById('activeState').classList.remove('hidden');
             document.getElementById('resPrice').innerText = Math.round(collectValue).toLocaleString();
             document.getElementById('resCurrency').innerText = cur;
             document.getElementById('resType').innerText = type;
             document.getElementById('resNote').innerText = note;
-
+            
             const badge = document.getElementById('rankBadge');
             badge.innerText = mult > 10 ? "Legendary" : (mult > 1 ? "Collectible" : "Common");
-            badge.className = mult > 10 ? "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-600 shadow-lg shadow-yellow-600/20" : "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-blue-600";
+            badge.className = mult > 10 ? "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-600" : "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-blue-600";
 
-            // Stats & History
-            if (valueVnd > maxVal) {
-                maxVal = valueVnd;
-                document.getElementById('statMax').innerText = Math.round(maxVal).toLocaleString() + "đ";
-            }
+            if (valueVnd > maxVal) { maxVal = valueVnd; document.getElementById('statMax').innerText = Math.round(maxVal).toLocaleString() + "đ"; }
             history.unshift({ s, type, price: collectValue, cur, vnd: valueVnd });
             document.getElementById('statTotalCheck').innerText = history.length;
             updateHistoryUI();
-            notify("✅ Đã thẩm định thành công!");
+            notify("✅ Đã thẩm định!");
         }
 
         function isValidDate(s) {
             const d = parseInt(s.slice(0, 2)), m = parseInt(s.slice(2, 4)), y = parseInt(s.slice(4));
-            if (m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2026) return false;
-            return true;
+            return !(m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2026);
         }
 
         function updateHistoryUI() {
-            const container = document.getElementById('historyList');
-            container.innerHTML = history.slice(0, 6).map(h => `
-                <div class="glass-card p-4 rounded-2xl border border-white/5 animate-fadeIn">
-                    <div class="flex justify-between items-start">
-                        <span class="text-[10px] text-gray-500 font-bold uppercase">${h.cur}</span>
-                        <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-blue-400 font-bold">${h.s}</span>
-                    </div>
-                    <p class="text-xs font-bold mt-2 truncate">${h.type}</p>
-                    <p class="text-green-400 font-bold mt-1">${Math.round(h.price).toLocaleString()} ${h.cur}</p>
-                </div>
-            `).join('');
+            document.getElementById('historyList').innerHTML = history.slice(0, 6).map(h => `<div class="glass-card p-4 rounded-2xl border border-white/5"> <div class="flex justify-between items-start"> <span class="text-[10px] text-gray-500 font-bold uppercase">${h.cur}</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-blue-400 font-bold">${h.s}</span> </div> <p class="text-xs font-bold mt-2">${h.type}</p> <p class="text-green-400 font-bold mt-1">${Math.round(h.price).toLocaleString()} ${h.cur}</p> </div>`).join('');
         }
 
-        function notify(msg) {
-            const n = document.getElementById('notification');
-            n.innerText = msg; n.style.display = 'block';
-            setTimeout(() => n.style.display = 'none', 3000);
-        }
+        function notify(msg) { const n = document.getElementById('notification'); n.innerText = msg; n.style.display = 'block'; setTimeout(() => n.style.display = 'none', 3000); }
 
         function openTab(evt, name) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -270,34 +247,14 @@
             if(name === 'stats') initChart();
         }
 
-        function randomSerial() {
-            const r = Math.floor(Math.random() * 90000000 + 10000000).toString();
-            document.getElementById('serial').value = r;
-            analyze();
-        }
+        function randomSerial() { document.getElementById('serial').value = Math.floor(Math.random() * 90000000 + 10000000).toString(); analyze(); }
 
-        let chart = null;
         function initChart() {
             const ctx = document.getElementById('myChart').getContext('2d');
             if (chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: history.map((_, i) => i + 1).reverse(),
-                    datasets: [{
-                        label: 'Giá trị quy đổi (VNĐ)',
-                        data: history.map(h => h.vnd).reverse(),
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: { maintainAspectRatio: false, scales: { y: { display: false }, x: { grid: { display: false } } } }
-            });
+            chart = new Chart(ctx, { type: 'line', data: { labels: history.map((_, i) => i + 1).reverse(), datasets: [{ label: 'Giá trị (VNĐ)', data: history.map(h => h.vnd).reverse(), borderColor: '#3b82f6', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
         }
 
-        // Init
         updateDenominations();
     </script>
 </body>
