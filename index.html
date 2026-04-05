@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Định Giá Tiền Số Đẹp v3.0 - Duy Collector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; background: #050505; color: #fff; }
+        .glass-card { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(15px); border: 1px solid #333; }
+        .input-style { background: #111; border: 1px solid #444; transition: 0.3s; }
+        .input-style:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        .glow-button { background: linear-gradient(45deg, #2563eb, #7c3aed); transition: 0.5s; }
+        .glow-button:hover { box-shadow: 0 0 20px rgba(124, 58, 237, 0.6); transform: translateY(-2px); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="glass-card max-w-2xl w-full p-10 rounded-[2rem] shadow-2xl">
+        <h1 class="text-4xl font-bold text-center mb-1 tracking-tighter">PREMIUM VALUATOR</h1>
+        <p class="text-blue-400 text-center text-xs font-bold uppercase tracking-widest mb-10">AI-Powered Currency Grading</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-5">
+                <div>
+                    <label class="text-xs text-gray-400 font-bold mb-2 block">TIỀN TỆ & MỆNH GIÁ</label>
+                    <div class="flex gap-2">
+                        <select id="currency" class="input-style p-3 rounded-xl w-24 outline-none">
+                            <option value="VND">VNĐ</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                        <input type="number" id="deno" placeholder="Mệnh giá..." class="input-style p-3 rounded-xl flex-1 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-400 font-bold mb-2 block">SERI (VD: AA 24242424)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="prefix" placeholder="AA" maxlength="2" class="input-style p-3 rounded-xl w-20 text-center font-bold uppercase outline-none">
+                        <input type="text" id="serial" placeholder="12345678" maxlength="8" class="input-style p-3 rounded-xl flex-1 tracking-widest font-bold outline-none text-blue-400">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs text-gray-400 font-bold mb-2 block">TÌNH TRẠNG (GRADE)</label>
+                    <select id="condition" class="input-style p-3 rounded-xl w-full outline-none">
+                        <option value="1.0">UNC (10/10 - Mới tinh)</option>
+                        <option value="0.7">XF/VF (8/10 - Hơi cũ)</option>
+                        <option value="0.3">F/G (4/10 - Nhàu/Rách)</option>
+                    </select>
+                </div>
+
+                <button onclick="checkValuation()" class="glow-button w-full p-4 rounded-2xl font-bold text-white mt-4 uppercase">Thẩm Định Giá Trị</button>
+            </div>
+
+            <div id="resultArea" class="bg-black/50 rounded-2xl p-6 border border-dashed border-gray-700 flex flex-col justify-center items-center text-center">
+                <div id="idleState">
+                    <p class="text-gray-500 italic text-sm">Nhập thông tin để xem định giá...</p>
+                </div>
+                <div id="activeState" class="hidden w-full">
+                    <span id="rankLabel" class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase"></span>
+                    <h2 class="text-5xl font-bold my-4 text-white" id="finalVal"></h2>
+                    <div class="text-left bg-white/5 p-4 rounded-xl space-y-2">
+                        <p class="text-xs"><span class="text-gray-400">Dạng số:</span> <span id="typeName" class="text-blue-300 font-bold"></span></p>
+                        <p class="text-xs"><span class="text-gray-400">Độ hiếm:</span> <span id="rarityScore" class="text-yellow-500 font-bold"></span></p>
+                        <p class="text-[10px] text-gray-500 leading-tight border-t border-gray-800 pt-2 mt-2" id="expertNote"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkValuation() {
+            const deno = parseFloat(document.getElementById('deno').value) || 0;
+            const s = document.getElementById('serial').value;
+            const cond = parseFloat(document.getElementById('condition').value);
+            const cur = document.getElementById('currency').value;
+
+            if (s.length < 8) { alert("Vui lòng nhập đủ 8 chữ số!"); return; }
+
+            let multiplier = 1;
+            let type = "Số thường";
+            let rarity = "Phổ thông";
+            let note = "Tờ tiền này có giá trị lưu thông bình thường.";
+
+            // LOGIC NHẬN DIỆN SỐ ĐẸP
+            if (/^(\d)\1{7}$/.test(s)) { // Bát quý
+                multiplier = 500; type = "Bát Quý"; rarity = "Cực phẩm (1/100tr)";
+                note = "Vua của các loại số đẹp. Giá trị cực cao trên mọi thị trường.";
+            } else if (/(\d)\1{6}/.test(s)) { // Thất quý
+                multiplier = 100; type = "Thất Quý"; rarity = "Siêu hiếm";
+                note = "Chỉ đứng sau bát quý. Rất được săn đón.";
+            } else if (/(\d)\1{5}/.test(s)) { // Lục quý
+                multiplier = 30; type = "Lục Quý"; rarity = "Hiếm";
+            } else if (s === "12345678" || s === "23456789" || s === "01234567") { // Sảnh rồng
+                multiplier = 200; type = "Sảnh Rồng"; rarity = "Đại cát";
+                note = "Biểu tượng của sự thăng tiến không ngừng.";
+            } else if (s.slice(0,4) === s.slice(4,8)) { // Tứ quý kép (VD: 22224444)
+                multiplier = 40; type = "Tứ Quý Kép"; rarity = "Hiếm";
+            } else if (s.slice(0,2) === s.slice(2,4) && s.slice(4,6) === s.slice(6,8) && s.slice(0,2) === s.slice(4,6)) { // Bát quý lặp
+                multiplier = 20; type = "Bát Quý Lặp (Như tờ 24242424)"; rarity = "Rất hiếm";
+                note = "Sự lặp lại hoàn hảo. Đặc biệt quý giá nếu gắn với năm phát hành.";
+            } else if (/(\d)\1{3}$/.test(s)) { // Tứ quý cuối
+                multiplier = 5; type = "Tứ Quý Đuôi"; rarity = "Khá";
+            } else if (/(\d)\1{2}$/.test(s)) { // Tam hoa cuối
+                multiplier = 1.5; type = "Tam Hoa Đuôi"; rarity = "Phổ thông+";
+            } else if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) { // Số Gánh/Đối (Radar)
+                multiplier = 10; type = "Số Gánh Đối (Radar)"; rarity = "Sưu tầm";
+                note = "Số đọc xuôi hay ngược đều giống nhau, cực kỳ cân bằng.";
+            }
+
+            // TÍNH GIÁ CUỐI
+            let finalPrice = deno;
+            if (type !== "Số thường") {
+                finalPrice = deno + (deno * multiplier * cond);
+            }
+
+            // HIỂN THỊ
+            document.getElementById('idleState').classList.add('hidden');
+            document.getElementById('activeState').classList.remove('hidden');
+            document.getElementById('finalVal').innerText = Math.round(finalPrice).toLocaleString();
+            document.getElementById('rankLabel').innerText = type !== "Số thường" ? "Collectible" : "Common";
+            document.getElementById('typeName').innerText = type;
+            document.getElementById('rarityScore').innerText = rarity;
+            document.getElementById('expertNote').innerText = note;
+        }
+    </script>
+</body>
+</html>
