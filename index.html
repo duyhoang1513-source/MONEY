@@ -3,162 +3,1021 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Định Giá Tiền Số Đẹp v3.5 - Duy Collector</title>
+    <title>Định Giá Tiền Số Đẹp v4.0 Pro - Duy Collector</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Space Grotesk', sans-serif; background: #050505; color: #fff; }
-        .glass-card { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(15px); border: 1px solid #333; }
-        .input-style { background: #111; border: 1px solid #444; transition: 0.3s; color: white; }
-        .input-style:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
-        .glow-button { background: linear-gradient(45deg, #2563eb, #7c3aed); transition: 0.5s; }
-        .glow-button:hover { box-shadow: 0 0 20px rgba(124, 58, 237, 0.6); transform: translateY(-2px); }
+        * { margin: 0; padding: 0; }
+        body { 
+            font-family: 'Space Grotesk', sans-serif; 
+            background: linear-gradient(135deg, #050505 0%, #0a0a0a 100%);
+            color: #fff; 
+            overflow-x: hidden;
+        }
+        .glass-card { 
+            background: rgba(20, 20, 20, 0.8); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid #333; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .input-style { 
+            background: #111; 
+            border: 1px solid #444; 
+            transition: 0.3s; 
+            color: white; 
+        }
+        .input-style:focus { 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); 
+            outline: none;
+        }
+        .glow-button { 
+            background: linear-gradient(45deg, #2563eb, #7c3aed); 
+            transition: 0.5s; 
+            cursor: pointer;
+            border: none;
+        }
+        .glow-button:hover { 
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.6); 
+            transform: translateY(-2px); 
+        }
+        .glow-button:active {
+            transform: translateY(0);
+        }
+        .tabs-container {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid #333;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: #999;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.875rem;
+            transition: 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: #3b82f6;
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #3b82f6;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .stat-box {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid #444;
+            padding: 1rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .number-pad button {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        .number-pad button:hover {
+            background: #2e2e2e;
+            border-color: #3b82f6;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        .badge-rare { background: rgba(168, 85, 247, 0.2); color: #c4b5fd; }
+        .badge-ultra { background: rgba(244, 63, 94, 0.2); color: #fca5a5; }
+        .badge-legend { background: rgba(251, 191, 36, 0.2); color: #fef3c7; }
+        .comparison-card {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid #444;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+        }
+        .price-trend {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-close {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-close:hover {
+            color: #fff;
+        }
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .rating-stars span {
+            transition: 0.2s;
+        }
+        .rating-stars span:hover,
+        .rating-stars span.active {
+            color: #fbbf24;
+            transform: scale(1.2);
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            z-index: 2000;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        input[type="range"] {
+            flex: 1;
+        }
+        .quick-calc {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .quick-calc button {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            color: #3b82f6;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+        .quick-calc button:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        .category-label {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        .expand-content {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: 0.75rem;
+            border-left: 3px solid #3b82f6;
+        }
+        .expand-content.active {
+            display: block;
+        }
+        .loading-spinner {
+            border: 4px solid #333;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
 
-    <div class="glass-card max-w-4xl w-full p-10 rounded-[2rem] shadow-2xl">
-        <h1 class="text-4xl font-bold text-center mb-1 tracking-tighter uppercase">Premium Valuator <span class="text-blue-500 text-xl">v3.5</span></h1>
-        <p class="text-blue-400 text-center text-xs font-bold uppercase tracking-widest mb-10">Hệ thống thẩm định số đẹp chuyên sâu</p>
+    <!-- NOTIFICATION -->
+    <div id="notification" class="notification" style="display: none;"></div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-5">
-                <div>
-                    <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Mệnh giá (VNĐ)</label>
-                    <select id="deno" class="input-style p-3 rounded-xl w-full outline-none">
-                        <option value="1000">1.000</option>
-                        <option value="2000">2.000</option>
-                        <option value="5000">5.000</option>
-                        <option value="10000">10.000</option>
-                        <option value="20000">20.000</option>
-                        <option value="50000">50.000</option>
-                        <option value="100000">100.000</option>
-                        <option value="200000">200.000</option>
-                        <option value="500000">500.000</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="text-xs text-gray-400 font-bold mb-2 block">SERI (VD: AA 24242424)</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="prefix" placeholder="AA" maxlength="2" class="input-style p-3 rounded-xl w-20 text-center font-bold uppercase outline-none">
-                        <input type="text" id="serial" placeholder="12345678" maxlength="8" class="input-style p-3 rounded-xl flex-1 tracking-widest font-bold outline-none text-blue-400">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Tình trạng (Grade)</label>
-                    <select id="condition" class="input-style p-3 rounded-xl w-full outline-none">
-                        <option value="1.0">UNC (10/10 - Mới nguyên bản)</option>
-                        <option value="0.7">XF/VF (8/10 - Có nếp gấp nhẹ)</option>
-                        <option value="0.3">F/G (4/10 - Cũ/Mềm/Bẩn)</option>
-                    </select>
-                </div>
-
-                <button onclick="checkValuation()" class="glow-button w-full p-4 rounded-2xl font-bold text-white mt-4 uppercase">Thẩm Định Ngay</button>
+    <!-- MAIN CONTAINER -->
+    <div class="glass-card max-w-5xl w-full p-10 rounded-[2rem]">
+        <div class="flex justify-between items-start mb-8">
+            <div>
+                <h1 class="text-4xl font-bold tracking-tighter uppercase">Premium Valuator <span class="text-blue-500 text-xl">v4.0 Pro</span></h1>
+                <p class="text-blue-400 text-center text-xs font-bold uppercase tracking-widest mt-2">Hệ thống thẩm định số đẹp chuyên sâu + AI + Thống kê nâng cao</p>
             </div>
+            <button onclick="toggleSettings()" class="text-2xl cursor-pointer hover:text-blue-400 transition">⚙️</button>
+        </div>
 
-            <div id="resultArea" class="bg-black/50 rounded-2xl p-6 border border-gray-700 flex flex-col justify-center items-center text-center relative overflow-hidden">
-                <div id="idleState">
-                    <p class="text-gray-500 italic text-sm">Chờ dữ liệu...</p>
-                </div>
-                
-                <div id="activeState" class="hidden w-full space-y-4">
-                    <span id="rankLabel" class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase"></span>
-                    <h2 class="text-5xl font-bold text-white" id="finalVal"></h2>
-                    
-                    <div class="text-left bg-white/5 p-4 rounded-xl space-y-2 border border-white/10">
-                        <p class="text-xs"><span class="text-gray-400">Dạng số:</span> <span id="typeName" class="text-blue-300 font-bold"></span></p>
-                        <p class="text-xs"><span class="text-gray-400">Độ hiếm:</span> <span id="rarityScore" class="text-yellow-500 font-bold"></span></p>
-                        <p class="text-[10px] text-gray-500 leading-tight border-t border-gray-800 pt-2 mt-2 italic" id="expertNote"></p>
+        <!-- TABS -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('valuator')">🎯 Thẩm Định</button>
+            <button class="tab-btn" onclick="switchTab('advanced')">🚀 Nâng Cao</button>
+            <button class="tab-btn" onclick="switchTab('compare')">⚖️ So Sánh</button>
+            <button class="tab-btn" onclick="switchTab('analytics')">📊 Phân Tích</button>
+            <button class="tab-btn" onclick="switchTab('market')">📈 Thị Trường</button>
+            <button class="tab-btn" onclick="switchTab('guide')">📚 Hướng Dẫn</button>
+        </div>
+
+        <!-- TAB 1: VALUATOR -->
+        <div id="valuator" class="tab-content active">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-5">
+                    <div>
+                        <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Mệnh giá (VNĐ)</label>
+                        <select id="deno" class="input-style p-3 rounded-xl w-full outline-none">
+                            <option value="1000">1.000đ</option>
+                            <option value="2000">2.000đ</option>
+                            <option value="5000">5.000đ</option>
+                            <option value="10000">10.000đ</option>
+                            <option value="20000">20.000đ</option>
+                            <option value="50000">50.000đ</option>
+                            <option value="100000">100.000đ</option>
+                            <option value="200000">200.000đ</option>
+                            <option value="500000">500.000đ</option>
+                        </select>
                     </div>
 
-                    <button onclick="window.print()" class="text-[10px] text-gray-400 hover:text-white underline mt-2">Xuất chứng chỉ số</button>
+                    <div>
+                        <label class="text-xs text-gray-400 font-bold mb-2 block">SERI (VD: AA 24242424)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="prefix" placeholder="AA" maxlength="2" class="input-style p-3 rounded-xl w-20 text-center font-bold uppercase outline-none">
+                            <input type="text" id="serial" placeholder="12345678" maxlength="8" class="input-style p-3 rounded-xl flex-1 tracking-widest font-bold outline-none text-blue-400" oninput="autoDetectType()">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Tình trạng (Grade)</label>
+                        <select id="condition" class="input-style p-3 rounded-xl w-full outline-none">
+                            <option value="1.0">UNC (10/10 - Mới nguyên bản)</option>
+                            <option value="0.85">AUNC (9/10 - Gần như mới)</option>
+                            <option value="0.7">XF/VF (8/10 - Có nếp gấp nhẹ)</option>
+                            <option value="0.55">VF (7/10 - Gấp rõ)</option>
+                            <option value="0.4">F (6/10 - Cũ nhưng rõ)</option>
+                            <option value="0.3">F/G (4/10 - Cũ/Mềm/Bẩn)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Năm phát hành</label>
+                        <input type="number" id="year" min="2000" max="2026" value="2020" class="input-style p-3 rounded-xl w-full outline-none">
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-gray-400 font-bold mb-2 block uppercase">Ghi chú riêng</label>
+                        <textarea id="notes" placeholder="VD: Có mốp nhỏ, bị gập..." class="input-style p-3 rounded-xl w-full outline-none resize-none" rows="2" maxlength="100"></textarea>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="checkValuation()" class="glow-button flex-1 p-4 rounded-2xl font-bold text-white uppercase">🎯 Thẩm Định Ngay</button>
+                        <button onclick="randomSerial()" class="bg-purple-600/40 border border-purple-500 flex-1 p-4 rounded-2xl font-bold text-white uppercase hover:bg-purple-600/60 transition">🎲 Random</button>
+                    </div>
+                </div>
+
+                <div id="resultArea" class="bg-black/50 rounded-2xl p-6 border border-gray-700 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                    <div id="idleState">
+                        <p class="text-gray-500 italic text-sm">⏳ Chờ dữ liệu...</p>
+                    </div>
+                    
+                    <div id="activeState" class="hidden w-full space-y-4">
+                        <div class="flex justify-center gap-2 flex-wrap" id="badgeContainer"></div>
+                        <span id="rankLabel" class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase inline-block"></span>
+                        <h2 class="text-5xl font-bold text-white" id="finalVal"></h2>
+                        
+                        <div class="text-left bg-white/5 p-4 rounded-xl space-y-2 border border-white/10">
+                            <p class="text-xs"><span class="text-gray-400">Dạng số:</span> <span id="typeName" class="text-blue-300 font-bold"></span></p>
+                            <p class="text-xs"><span class="text-gray-400">Độ hiếm:</span> <span id="rarityScore" class="text-yellow-500 font-bold"></span></p>
+                            <p class="text-xs"><span class="text-gray-400">Tăng giá:</span> <span id="priceIncrease" class="text-green-400 font-bold"></span></p>
+                            <p class="text-xs"><span class="text-gray-400">Năm phát hành:</span> <span id="yearDisplay" class="text-purple-400"></span></p>
+                            <p class="text-[10px] text-gray-500 leading-tight border-t border-gray-800 pt-2 mt-2 italic" id="expertNote"></p>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="copyResult()" class="text-[10px] text-gray-400 hover:text-white underline flex-1">📋 Copy Kết Quả</button>
+                            <button onclick="shareResult()" class="text-[10px] text-gray-400 hover:text-white underline flex-1">📤 Chia Sẻ</button>
+                            <button onclick="window.print()" class="text-[10px] text-gray-400 hover:text-white underline flex-1">🖨️ In Chứng Chỉ</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: ADVANCED -->
+        <div id="advanced" class="tab-content">
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-blue-400">🔬 Công Cụ Phân Tích Nâng Cao</h3>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-4">Tìm Kiếm Số Đẹp Tương Tự</h4>
+                    <div class="space-y-3">
+                        <input type="text" id="searchSerial" placeholder="Nhập số seri để tìm..." class="input-style p-3 rounded-xl w-full" maxlength="8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <button onclick="searchByPattern('repeat')" class="bg-blue-600/20 border border-blue-500 p-3 rounded-xl hover:bg-blue-600/30 transition">Tìm số Lặp</button>
+                            <button onclick="searchByPattern('radar')" class="bg-purple-600/20 border border-purple-500 p-3 rounded-xl hover:bg-purple-600/30 transition">Tìm số Gánh</button>
+                            <button onclick="searchByPattern('lucky')" class="bg-green-600/20 border border-green-500 p-3 rounded-xl hover:bg-green-600/30 transition">Tìm số Tài Lộc</button>
+                            <button onclick="searchByPattern('special')" class="bg-pink-600/20 border border-pink-500 p-3 rounded-xl hover:bg-pink-600/30 transition">Tìm số Đặc Biệt</button>
+                        </div>
+                        <div id="searchResults" class="mt-4 space-y-2"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-4">Tính Toán Giá Thương Mại</h4>
+                    <div class="space-y-3">
+                        <div class="flex gap-2">
+                            <input type="number" id="buyPrice" placeholder="Giá mua (đ)" class="input-style p-3 rounded-xl flex-1">
+                            <input type="number" id="profitPercent" placeholder="Lợi nhuận %" value="30" class="input-style p-3 rounded-xl w-32">
+                            <button onclick="calcSellPrice()" class="glow-button px-4 rounded-xl font-bold">Tính</button>
+                        </div>
+                        <div id="tradeResult" class="text-sm text-gray-400"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-4">Phân Tích Tuyệt Đối</h4>
+                    <div class="space-y-3">
+                        <div class="slider-container">
+                            <label class="text-xs text-gray-400">Hiếm: <span id="rareValue">50</span>%</label>
+                            <input type="range" id="rareSlider" min="0" max="100" value="50" oninput="updateAbsoluteAnalysis()" class="flex-1">
+                        </div>
+                        <div class="slider-container">
+                            <label class="text-xs text-gray-400">Đẹp: <span id="beautifulValue">50</span>%</label>
+                            <input type="range" id="beautifulSlider" min="0" max="100" value="50" oninput="updateAbsoluteAnalysis()" class="flex-1">
+                        </div>
+                        <div class="slider-container">
+                            <label class="text-xs text-gray-400">Liễu: <span id="luckValue">50</span>%</label>
+                            <input type="range" id="luckSlider" min="0" max="100" value="50" oninput="updateAbsoluteAnalysis()" class="flex-1">
+                        </div>
+                        <div id="analysisResult" class="text-sm text-blue-300 mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: COMPARE -->
+        <div id="compare" class="tab-content">
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-blue-400">⚖️ So Sánh Nhiều Tờ</h3>
+                <p class="text-xs text-gray-500">Thêm tối đa 5 tờ tiền để so sánh giá trị</p>
+
+                <div id="compareList" class="space-y-4">
+                    <div class="comparison-card">
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" placeholder="Seri 1" maxlength="8" class="input-style p-2 rounded-lg flex-1 text-sm">
+                            <input type="number" placeholder="Giá (đ)" class="input-style p-2 rounded-lg w-32 text-sm">
+                            <button onclick="removeCompare(this)" class="text-red-400 hover:text-red-600">❌</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="addCompareRow()" class="text-sm text-blue-400 hover:text-blue-300">+ Thêm Tờ Khác</button>
+                
+                <div id="compareChart" class="mt-6">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+
+                <div class="text-xs text-gray-500 mt-4">
+                    <p>💡 Trung bình: <span id="avgPrice" class="text-blue-300 font-bold">0đ</span></p>
+                    <p>📈 Cao nhất: <span id="maxPrice" class="text-green-400 font-bold">0đ</span></p>
+                    <p>📉 Thấp nhất: <span id="minPrice" class="text-red-400 font-bold">0đ</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: ANALYTICS -->
+        <div id="analytics" class="tab-content">
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-blue-400">📊 Thống Kê & Phân Tích</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalValuations">0</div>
+                        <div class="stat-label">Tổng Thẩm Định</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalValue">0đ</div>
+                        <div class="stat-label">Giá Trị Tổng</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="avgValue">0đ</div>
+                        <div class="stat-label">Giá Trị Trung Bình</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="rareCount">0</div>
+                        <div class="stat-label">Số Đẹp Hiếm</div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-4">Biểu Đồ Phân Loại</h4>
+                    <canvas id="categoryChart" height="80"></canvas>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-4">Top 10 Số Đắt Nhất</h4>
+                    <div id="topList" class="space-y-2"></div>
+                </div>
+
+                <button onclick="exportStats()" class="w-full bg-blue-600 p-3 rounded-xl font-bold hover:bg-blue-700 transition">📥 Xuất Dữ Liệu (CSV)</button>
+            </div>
+        </div>
+
+        <!-- TAB 5: MARKET -->
+        <div id="market" class="tab-content">
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-blue-400">📈 Thị Trường & Xu Hướng</h3>
+
+                <div class="price-trend">
+                    <p class="text-sm mb-2">🔥 Giá Thị Trường Gần Đây</p>
+                    <div id="marketChart" class="mt-3">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-4">📣 Top Xu Hướng</h4>
+                    <div class="space-y-3" id="trendList">
+                        <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
+                            <span>🏆 Số Tài Lộc (68, 86, 79)</span>
+                            <span class="text-green-400 font-bold">+45%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
+                            <span>🎯 Số Lặp (REPEAT)</span>
+                            <span class="text-green-400 font-bold">+32%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg border border-white/10">
+                            <span>💎 Bát Quý (8 chữ giống)</span>
+                            <span class="text-yellow-400 font-bold">STABLE</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-4">⚡ Dự Báo Giá (AI)</h4>
+                    <input type="number" id="predictPrice" placeholder="Nhập giá (đ)" class="input-style p-3 rounded-xl w-full mb-3">
+                    <button onclick="predictPrice()" class="w-full glow-button p-3 rounded-xl font-bold">🤖 Dự Báo</button>
+                    <div id="predictionResult" class="mt-3 text-sm text-gray-400"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: GUIDE -->
+        <div id="guide" class="tab-content">
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-blue-400">📚 Hướng Dẫn & Kiến Thức</h3>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-3">🎓 Phân Loại Số Đẹp</h4>
+                    
+                    <div class="space-y-4">
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Bát Quý (8 chữ giống) - Vua của các số đẹp</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Ví dụ: 11111111, 22222222, 88888888</p>
+                            <p class="text-xs text-gray-400 mt-2">Nhân lên 800 lần giá mệnh giá. Cực kỳ hiếm và đắt tiền.</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Thất Quý (7 chữ giống) - Siêu hiếm</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Ví dụ: 11111112, 22222223, 77777778</p>
+                            <p class="text-xs text-gray-400 mt-2">Nhân lên 150 lần. Rất giá trị và được săn lùng.</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Sảnh Rồng (12345678, 23456789) - Tuyệt phẩm</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Chuỗi số liên tiếp hoàn hảo</p>
+                            <p class="text-xs text-gray-400 mt-2">Nhân lên 300 lần. Là một trong những số đẹp đất hiếm nhất.</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Số Ngày Sinh - Kỷ niệm</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Ví dụ: 15061990 (15/06/1990), 25121999 (25/12/1999)</p>
+                            <p class="text-xs text-gray-400 mt-2">Nhân lên 15 lần. Giá trị tình cảm cao, thích hợp tặng quà.</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Số Tài Lộc (68, 86, 79, 39 ở cuối)</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Ví dụ: 12345686, 45678679, 91234568</p>
+                            <p class="text-xs text-gray-400 mt-2">Nhân 2.5-3 lần. Phổ biến, giá hợp lý, dân chơi yêu thích.</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Số Lặp (Repeat) - Nửa đầu = Nửa sau</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Ví dụ: 12341234, 56785678, 99999999</p>
+                            <p class="text-xs text-gray-400 mt-2">Nhân lên 30 lần. Cân đối, dễ nhớ, rất được yêu thích.</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Số Gánh (Radar) - Đối xứng</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Ví dụ: 12344321, 56788765, 98766789</p>
+                            <p class="text-xs text-gray-400 mt-2">Nhân lên 20 lần. Cấu trúc đối xứng đẹp mắt.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-3">💡 Mẹo Chọn Số Đẹp</h4>
+                    <ul class="text-xs text-gray-300 space-y-2">
+                        <li>✅ Ưu tiên Bát Quý & Thất Quý nếu có điều kiện</li>
+                        <li>✅ Số Tài Lộc là lựa chọn tốt cho dân chơi</li>
+                        <li>✅ Kiểm tra tình trạng tiền cẩn thận (Grade)</li>
+                        <li>✅ Năm phát hành ảnh hưởng đến giá trị</li>
+                        <li>✅ Tiền cũ đôi khi đắt hơn tiền mới</li>
+                        <li>✅ Tìm nhân vật nổi tiếng với số seri</li>
+                    </ul>
+                </div>
+
+                <div class="glass-card p-6 rounded-xl">
+                    <h4 class="font-bold text-sm mb-3">❓ Các Câu Hỏi Thường Gặp</h4>
+                    <div class="space-y-3">
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Làm sao để biết tiền số đẹp của tôi giá bao nhiêu?</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Sử dụng công cụ Thẩm Định ở tab đầu tiên. Nhập mệnh giá, seri, tình trạng và năm phát hành.</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Grade UNC, XF, F là gì?</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">UNC = Uncirculated (Mới nguyên bản, 10/10)<br>XF/VF = Extremely Fine/Very Fine (8-9/10)<br>F = Fine (6-7/10)<br>G = Good (4-5/10)</p>
+                        </div>
+
+                        <div class="expand-btn" onclick="toggleExpand(this)">▶ Tiền nào có giá cao nhất?</div>
+                        <div class="expand-content">
+                            <p class="text-xs text-gray-300">Bát Quý mệnh giá cao (500k) ở grade UNC có thể lên tới vài tỷ đồng.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="glass-card max-w-4xl w-full p-6 rounded-2xl">
-        <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Lịch sử thẩm định gần đây</h3>
+    <!-- HISTORY & FAVORITES -->
+    <div class="glass-card max-w-5xl w-full p-6 rounded-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold text-gray-400 uppercase">📜 Lịch Sử Thẩm Định (Top 10)</h3>
+            <button onclick="clearHistory()" class="text-xs text-red-400 hover:text-red-300">🗑️ Xóa Lịch Sử</button>
+        </div>
         <div id="historyList" class="space-y-2">
             <p class="text-xs text-gray-600">Chưa có lịch sử.</p>
         </div>
     </div>
 
+    <!-- FAVORITES -->
+    <div class="glass-card max-w-5xl w-full p-6 rounded-2xl">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold text-gray-400 uppercase">⭐ Yêu Thích</h3>
+            <button onclick="clearFavorites()" class="text-xs text-red-400 hover:text-red-300">🗑️ Xóa Tất Cả</button>
+        </div>
+        <div id="favoritesList" class="space-y-2">
+            <p class="text-xs text-gray-600">Chưa có yêu thích nào.</p>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="toggleSettings()">×</span>
+            <h3 class="text-lg font-bold mb-4">⚙️ Cài Đặt</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-bold mb-2 block">🌙 Chế Độ Tối</label>
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="darkMode" checked class="mr-2">
+                        <span class="text-xs">Bật chế độ tối</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold mb-2 block">📢 Thông Báo</label>
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="notifications" checked class="mr-2">
+                        <span class="text-xs">Bật thông báo</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold mb-2 block">💾 Lưu Dữ Liệu</label>
+                    <button onclick="backupData()" class="w-full bg-blue-600 p-2 rounded-lg text-sm hover:bg-blue-700 transition mb-2">📥 Tải Lưu</button>
+                    <button onclick="document.getElementById('uploadFile').click()" class="w-full bg-purple-600 p-2 rounded-lg text-sm hover:bg-purple-700 transition">📤 Phục Hồi</button>
+                    <input type="file" id="uploadFile" style="display: none;" onchange="restoreData(event)">
+                </div>
+
+                <div>
+                    <label class="text-sm font-bold mb-2 block">❌ Nguy Hiểm</label>
+                    <button onclick="resetAll()" class="w-full bg-red-600/40 border border-red-500 p-2 rounded-lg text-sm text-red-400 hover:bg-red-600/60 transition">🔄 Reset Tất Cả</button>
+                </div>
+
+                <hr class="border-gray-700">
+
+                <p class="text-xs text-gray-500">v4.0 Pro | © 2026 Duy Collector | <a href="#" class="text-blue-400">Báo Lỗi</a></p>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ========== DATA MANAGEMENT ==========
         let history = [];
+        let favorites = [];
+        let currentResult = null;
+
+        // LocalStorage Init
+        function initData() {
+            const stored = localStorage.getItem('premiumValuatorData');
+            if (stored) {
+                const data = JSON.parse(stored);
+                history = data.history || [];
+                favorites = data.favorites || [];
+            }
+            updateHistoryUI();
+            updateFavoritesUI();
+        }
+
+        function saveData() {
+            localStorage.setItem('premiumValuatorData', JSON.stringify({ history, favorites }));
+        }
+
+        // ========== UI FUNCTIONS ==========
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsModal').classList.toggle('active');
+        }
+
+        function toggleExpand(btn) {
+            const content = btn.nextElementSibling;
+            content.classList.toggle('active');
+            btn.textContent = content.classList.contains('active') ? '▼ ' + btn.textContent.slice(2) : '▶ ' + btn.textContent.slice(2);
+        }
+
+        function showNotification(msg, type = 'success') {
+            const notif = document.getElementById('notification');
+            notif.textContent = msg;
+            notif.style.display = 'block';
+            notif.className = 'notification';
+            if (type === 'error') notif.style.background = 'rgba(239, 68, 68, 0.9)';
+            setTimeout(() => notif.style.display = 'none', 3000);
+        }
+
+        // ========== MAIN VALUATION ==========
+        const typeDatabase = {
+            'batquy': { name: 'Bát Quý', mult: 800, rarity: 'Cực phẩm', note: 'Vua của các loại số đẹp. Cực kỳ giá trị.' },
+            'thatquy': { name: 'Thất Quý', mult: 150, rarity: 'Siêu hiếm', note: 'Rất hiếm và đắt tiền.' },
+            'sanhrong': { name: 'Sảnh Rồng', mult: 300, rarity: 'Tuyệt phẩm', note: 'Chuỗi liên tiếp hoàn hảo.' },
+            'birthday': { name: 'Số Ngày Sinh', mult: 15, rarity: 'Kỷ niệm', note: 'Trùng khớp với ngày tháng năm sinh.' },
+            'locphat': { name: 'Lộc Phát Kép', mult: 12, rarity: 'Phong thủy cao', note: 'Hai ký tự may mắn kép.' },
+            'tailoc': { name: 'Số Tài Lộc', mult: 2.5, rarity: 'Dân chơi', note: 'Số may mắn, phổ biến.' },
+            'repeat': { name: 'Số Lặp', mult: 30, rarity: 'Sưu tầm', note: 'Nửa đầu = Nửa sau.' },
+            'radar': { name: 'Số Gánh', mult: 20, rarity: 'Hiếm', note: 'Cấu trúc đối xứng.' },
+            'normal': { name: 'Số Thường', mult: 1, rarity: 'Phổ thông', note: 'Giá trị lưu thông thông thường.' }
+        };
+
+        function isBirthday(str) {
+            const day = parseInt(str.slice(0,2));
+            const month = parseInt(str.slice(2,4));
+            const year = parseInt(str.slice(4,8));
+            return (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= 2026);
+        }
+
+        function detectType(s) {
+            if (/^(\d)\1{7}$/.test(s)) return 'batquy';
+            if (/(\d)\1{6}/.test(s)) return 'thatquy';
+            if (s === "12345678" || s === "23456789") return 'sanhrong';
+            if (isBirthday(s)) return 'birthday';
+            if (/(6868|8686|7979|3939)$/.test(s)) return 'locphat';
+            if (/(68|86|79|39)$/.test(s)) return 'tailoc';
+            if (s.slice(0,4) === s.slice(4,8)) return 'repeat';
+            if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) return 'radar';
+            return 'normal';
+        }
+
+        function autoDetectType() {
+            const s = document.getElementById('serial').value;
+            if (s.length === 8 && !isNaN(s)) {
+                const type = detectType(s);
+                const info = typeDatabase[type];
+                showNotification(`🎯 Phát hiện: ${info.name}`);
+            }
+        }
 
         function checkValuation() {
             const deno = parseFloat(document.getElementById('deno').value);
             const prefix = document.getElementById('prefix').value.toUpperCase() || "XX";
             const s = document.getElementById('serial').value;
             const cond = parseFloat(document.getElementById('condition').value);
+            const year = parseInt(document.getElementById('year').value);
+            const notes = document.getElementById('notes').value;
 
-            if (s.length < 8 || isNaN(s)) { alert("Số seri phải đủ 8 chữ số!"); return; }
-
-            let multiplier = 1;
-            let type = "Số thường";
-            let rarity = "Phổ thông";
-            let note = "Giá trị lưu thông thông thường.";
-
-            // LOGIC NHẬN DIỆN MỞ RỘNG
-            const isBirthday = (str) => {
-                const day = parseInt(str.slice(0,2));
-                const month = parseInt(str.slice(2,4));
-                const year = parseInt(str.slice(4,8));
-                return (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= 2026);
-            };
-
-            if (/^(\d)\1{7}$/.test(s)) { 
-                multiplier = 800; type = "Bát Quý"; rarity = "Cực phẩm";
-                note = "Vua của các loại số đẹp. Cực kỳ giá trị.";
-            } else if (/(\d)\1{6}/.test(s)) { 
-                multiplier = 150; type = "Thất Quý"; rarity = "Siêu hiếm";
-            } else if (s === "12345678" || s === "23456789") { 
-                multiplier = 300; type = "Sảnh Rồng"; rarity = "Tuyệt phẩm";
-            } else if (isBirthday(s)) {
-                multiplier = 15; type = "Số Ngày Sinh"; rarity = "Kỷ niệm";
-                note = "Trùng khớp hoàn toàn với một ngày trong lịch sử.";
-            } else if (/(6868|8686|7979|3939)$/.test(s)) {
-                multiplier = 12; type = "Lộc Phát/Thần Tài Kép"; rarity = "Phong thủy cao";
-            } else if (/(68|86|79|39)$/.test(s)) {
-                multiplier = 2.5; type = "Số Tài Lộc"; rarity = "Dân chơi";
-            } else if (s.slice(0,4) === s.slice(4,8)) {
-                multiplier = 30; type = "Số Lặp (Repeat)"; rarity = "Sưu tầm";
-            } else if (s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4]) {
-                multiplier = 20; type = "Số Gánh (Radar)"; rarity = "Hiếm";
+            if (s.length < 8 || isNaN(s)) { 
+                showNotification('Số seri phải đủ 8 chữ số!', 'error'); 
+                return; 
             }
 
-            // TÍNH GIÁ (Logic: Số đẹp + Giá trị sưu tầm)
-            let finalPrice = type === "Số thường" ? deno : (deno + (deno * multiplier * cond));
-            
-            // CẬP NHẬT GIAO DIỆN
+            const type = detectType(s);
+            const info = typeDatabase[type];
+            let multiplier = info.mult;
+
+            // Điều chỉnh theo năm
+            const yearBonus = Math.max(0, 2026 - year) * 0.01;
+            multiplier *= (1 + yearBonus);
+
+            // Tính giá
+            let finalPrice = type === 'normal' ? deno : (deno + (deno * multiplier * cond));
+
+            // Lưu kết quả
+            currentResult = { deno, prefix, serial: s, type, mult: multiplier, price: finalPrice, cond, year, notes };
+
+            // Cập nhật UI
             document.getElementById('idleState').classList.add('hidden');
             document.getElementById('activeState').classList.remove('hidden');
             document.getElementById('finalVal').innerText = Math.round(finalPrice).toLocaleString() + "đ";
-            document.getElementById('rankLabel').innerText = type !== "Số thường" ? "Collectible" : "Common";
-            document.getElementById('typeName').innerText = type;
-            document.getElementById('rarityScore').innerText = rarity;
-            document.getElementById('expertNote').innerText = note;
+            document.getElementById('rankLabel').innerText = type !== "normal" ? "🌟 Collectible" : "📄 Common";
+            document.getElementById('typeName').innerText = info.name;
+            document.getElementById('rarityScore').innerText = info.rarity;
+            document.getElementById('priceIncrease').innerText = `${(multiplier * cond).toFixed(1)}x`;
+            document.getElementById('yearDisplay').innerText = year;
+            document.getElementById('expertNote').innerText = info.note;
 
-            // LƯU LỊCH SỬ
-            addToHistory(prefix, s, finalPrice, type);
+            // Badges
+            let badges = '';
+            if (type !== 'normal') badges += `<span class="badge badge-${type === 'batquy' || type === 'thatquy' ? 'ultra' : 'rare'}">${info.rarity}</span>`;
+            if (cond === 1.0) badges += `<span class="badge badge-rare">🆕 UNC</span>`;
+            document.getElementById('badgeContainer').innerHTML = badges;
+
+            addToHistory(prefix, s, finalPrice, type, info.name);
+            showNotification('✅ Thẩm định thành công!');
         }
 
-        function addToHistory(pre, ser, price, type) {
-            const list = document.getElementById('historyList');
-            const item = { pre, ser, price, type };
+        function addToHistory(pre, ser, price, typeId, typeName) {
+            const item = { pre, ser, price, typeId, typeName, date: new Date().toLocaleString() };
             history.unshift(item);
-            if(history.length > 5) history.pop();
+            if(history.length > 10) history.pop();
+            saveData();
+            updateHistoryUI();
+        }
 
-            list.innerHTML = history.map(i => `
-                <div class="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-lg border border-white/5">
-                    <span><b class="text-blue-400">${i.pre} ${i.ser}</b> - ${i.type}</span>
-                    <span class="font-bold text-green-400">${Math.round(i.price).toLocaleString()}đ</span>
+        function updateHistoryUI() {
+            const list = document.getElementById('historyList');
+            if (history.length === 0) {
+                list.innerHTML = '<p class="text-xs text-gray-600">Chưa có lịch sử.</p>';
+                return;
+            }
+            list.innerHTML = history.map((i, idx) => `
+                <div class="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-lg border border-white/5 hover:border-white/20 transition group">
+                    <div>
+                        <p class="text-blue-300 font-bold">${i.pre} ${i.ser}</p>
+                        <p class="text-gray-500">${i.typeName} • ${i.date}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-green-400">${Math.round(i.price).toLocaleString()}đ</span>
+                        <button onclick="loadFromHistory(${idx})" class="text-blue-400 opacity-0 group-hover:opacity-100 transition">↻</button>
+                        <button onclick="addFavorite('${i.pre}', '${i.ser}', ${i.price})" class="text-yellow-400 opacity-0 group-hover:opacity-100 transition">⭐</button>
+                    </div>
                 </div>
             `).join('');
         }
-    </script>
-</body>
-</html>
+
+        function loadFromHistory(idx) {
+            const item = history[idx];
+            document.getElementById('prefix').value = item.pre;
+            document.getElementById('serial').value = item.ser;
+            checkValuation();
+        }
+
+        function clearHistory() {
+            if (confirm('Bạn chắc chắn muốn xóa lịch sử?')) {
+                history = [];
+                saveData();
+                updateHistoryUI();
+                showNotification('✅ Đã xóa lịch sử');
+            }
+        }
+
+        function addFavorite(pre, ser, price) {
+            if (favorites.some(f => f.ser === ser)) {
+                showNotification('Đã có trong yêu thích rồi!', 'error');
+                return;
+            }
+            favorites.unshift({ pre, ser, price, date: new Date().toLocaleString() });
+            if (favorites.length > 20) favorites.pop();
+            saveData();
+            updateFavoritesUI();
+            showNotification('⭐ Đã thêm yêu thích');
+        }
+
+        function updateFavoritesUI() {
+            const list = document.getElementById('favoritesList');
+            if (favorites.length === 0) {
+                list.innerHTML = '<p class="text-xs text-gray-600">Chưa có yêu thích nào.</p>';
+                return;
+            }
+            list.innerHTML = favorites.map((i, idx) => `
+                <div class="flex justify-between items-center text-[11px] bg-white/5 p-2 rounded-lg border border-white/5">
+                    <div>
+                        <p class="text-yellow-400 font-bold">⭐ ${i.pre} ${i.ser}</p>
+                        <p class="text-gray-500">${i.date}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold">${Math.round(i.price).toLocaleString()}đ</span>
+                        <button onclick="removeFavorite(${idx})" class="text-red-400 hover:text-red-300">❌</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function removeFavorite(idx) {
+            favorites.splice(idx, 1);
+            saveData();
+            updateFavoritesUI();
+        }
+
+        function clearFavorites() {
+            if (confirm('Bạn chắc chắn muốn xóa tất cả yêu thích?')) {
+                favorites = [];
+                saveData();
+                updateFavoritesUI();
+                showNotification('✅ Đã xóa yêu thích');
+            }
+        }
+
+        // ========== COPY & SHARE ==========
+        function copyResult() {
+            if (!currentResult) return;
+            const text = `${currentResult.prefix} ${currentResult.serial}\nGiá: ${Math.round(currentResult.price).toLocaleString()}đ\nLoại: ${typeDatabase[currentResult.type].name}\nGrade: ${currentResult.cond}`;
+            navigator.clipboard.writeText(text);
+            showNotification('📋 Đã copy kết quả');
+        }
+
+        function shareResult() {
+            if (!currentResult) return;
+            const text = `Tôi vừa thẩm định: ${currentResult.prefix} ${currentResult.serial} - ${typeDatabase[currentResult.type].name} - Giá: ${Math.round(currentResult.price).toLocaleString()}đ (Premium Valuator v4.0)`;
+            if (navigator.share) {
+                navigator.share({ title: 'Premium Valuator', text });
+            } else {
+                showNotification('Vui lòng copy thủ công');
+            }
+        }
+
+        // ========== ADVANCED FEATURES ==========
+        function randomSerial() {
+            let s = '';
+            for (let i = 0; i < 8; i++) s += Math.floor(Math.random() * 10);
+            document.getElementById('serial').value = s;
+            autoDetectType();
+        }
+
+        function searchByPattern(pattern) {
+            const results = [];
+            const patterns = {
+                'repeat': (s) => s.slice(0,4) === s.slice(4,8),
+                'radar': (s) => s[0] === s[7] && s[1] === s[6] && s[2] === s[5] && s[3] === s[4],
+                'lucky': (s) => /(68|86|79|39)$/.test(s),
+                'special': (s) => /(\d)\1{3,}/.test(s)
+            };
+
+            // Generate examples
+            const examples = {
+                'repeat': ['12341234', '56785678', '99999999', '11111111'],
+                'radar': ['12344321', '56788765', '98766789', '54345345'],
+                'lucky': ['12345686', '45678679', '91234568', '34567968'],
+                'special': ['11115555', '22226666', '33337777', '99991111']
+            };
+
+            const html = examples[pattern].map(e => `
+                <div class="flex justify-between items-center p-2 bg-blue-600/10 border border-blue-600/30 rounded-lg text-xs">
+                    <span class="font-bold text-blue-300">${e}</span>
+                    <button onclick="document.getElementById('serial').value='${e}'; autoDetectType();" class="text-blue-400 hover:text-blue-300">→ Chọn</button>
+                </div>
+            `).join('');
+            document.getElementById('searchResults').innerHTML = html;
+        }
+
+        function calcSellPrice() {
+            const buy = parseFloat(document.getElementById('buyPrice').value);
+            const profit = parseFloat(document.getElementById('profitPercent').value);
+            if (!buy || !profit) return;
+            const sell = buy * (1 + profit / 100);
+            document.getElementById('tradeResult').innerHTML = `
+                <p class="text-green-400 font-bold">Bán: ${Math.round(sell).toLocaleString()}đ</p>
+                <p class="text-gray-400">Lợi nhuận: ${Math.round(sell - buy).toLocaleString()}đ</p>
+            `;
+        }
+
+        function updateAbsoluteAnalysis() {
+            const rare = parseInt(document.getElementById('rareSlider').value);
+            const beautiful = parseInt(document.getElementById('beautifulSlider').value);
+            const luck = parseInt(document.getElementById('luckSlider').value);
+            document.getElementById('rareValue').innerText = rare;
+            document.getElementById('beautifulValue').innerText = beautiful;
+            document.getElementById('luckValue').innerText = luck;
+            const score = (rare + beautiful + luck) / 3;
+            const rating = score > 80 ? '🔥 Tuyệt vời' : score > 60 ? '⭐ Tốt' : score > 40 ? '👍 Bình thường' : '📄 Thường';
+            document.getElementById('analysisResult').innerHTML = `<p class="font-bold">${rating} (${score.toFixed(1)}/100)</p>`;
+        }
+
+        function addCompareRow() {
+            if (document.querySelectorAll('.comparison-card').length >= 5) {
+                showNotification('Tối đa 5 tờ!', 'error');
+                return;
+            }
+            const html = `
+                <div class="comparison-card">
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" placeholder="Seri" maxlength="8" class="input-style p-2 rounded-lg flex-1 text-sm">
+                        <input type="number" placeholder="Giá (đ)" class="input-style p-2 rounded-lg w-32 text-sm">
+                        <button onclick="removeCompare(this)" class="text-red-400 hover:text-red-600">❌
