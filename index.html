@@ -302,15 +302,15 @@
         </div>
 
         <!-- TABS -->
-        <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('valuator')">🎯 Thẩm Định</button>
-            <button class="tab-btn" onclick="switchTab('advanced')">🚀 Nâng Cao</button>
-            <button class="tab-btn" onclick="switchTab('compare')">⚖️ So Sánh</button>
-            <button class="tab-btn" onclick="switchTab('analytics')">📊 Phân Tích</button>
-            <button class="tab-btn" onclick="switchTab('market')">📈 Thị Trường</button>
-            <button class="tab-btn" onclick="switchTab('guide')">📚 Hướng Dẫn</button>
-            <button class="tab-btn" onclick="switchTab('certificate')">🎖️ Chứng Chỉ</button>
-        </div>
+       <div class="tabs-container">
+    <button class="tab-btn active" data-tab="valuator">🎯 Thẩm Định</button>
+    <button class="tab-btn" data-tab="advanced">🚀 Nâng Cao</button>
+    <button class="tab-btn" data-tab="compare">⚖️ So Sánh</button>
+    <button class="tab-btn" data-tab="analytics">📊 Phân Tích</button>
+    <button class="tab-btn" data-tab="market">📈 Thị Trường</button>
+    <button class="tab-btn" data-tab="guide">📚 Hướng Dẫn</button>
+    <button class="tab-btn" data-tab="certificate">🎖️ Chứng Chỉ</button>
+</div>
 
         <!-- TAB 1: VALUATOR -->
         <div id="valuator" class="tab-content active">
@@ -745,22 +745,33 @@
         }
 
         // ========== UI FUNCTIONS ==========
-     function switchTab(tab) {
+function switchTab(tab) {
+    // Xóa active từ tất cả
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     
+    // Thêm active vào tab-content
     const contentEl = document.getElementById(tab);
     if (contentEl) {
         contentEl.classList.add('active');
     }
     
-    // Tìm nút tab tương ứng và thêm active class
-    const tabBtn = document.querySelector(`[onclick="switchTab('${tab}')"]`);
-    if (tabBtn) {
-        tabBtn.classList.add('active');
+    // Thêm active vào button tương ứng
+    const btn = document.querySelector(`[data-tab="${tab}"]`);
+    if (btn) {
+        btn.classList.add('active');
     }
 }
 
+// Thêm event listeners khi load
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tabName = btn.getAttribute('data-tab');
+            switchTab(tabName);
+        });
+    });
+});
         function toggleSettings() {
             const modal = document.getElementById('settingsModal');
             if (modal) modal.classList.toggle('active');
