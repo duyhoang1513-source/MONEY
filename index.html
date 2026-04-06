@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valuator v4.4 Apex - Duy Collector</title>
+    <title>Valuator v4.5 Apex - Duy Collector</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
@@ -21,6 +21,8 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .notification { position: fixed; top: 20px; right: 20px; background: #3b82f6; color: white; padding: 1rem; border-radius: 12px; z-index: 1000; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .rare-item { background: rgba(255,255,255,0.03); border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0 12px 12px 0; }
+        .phone-display { font-size: 2.5rem; font-weight: bold; letter-spacing: 0.2em; text-align: center; padding: 2rem; background: rgba(59, 130, 246, 0.1); border-radius: 1.5rem; border: 2px solid #3b82f6; }
+        .plate-display { background: #FFD700; color: #000; font-weight: bold; padding: 1rem; border-radius: 0.5rem; text-align: center; font-size: 1.5rem; letter-spacing: 0.1em; border: 3px solid #000; font-family: Arial, sans-serif; }
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center">
@@ -30,17 +32,19 @@
     <div class="glass-card max-w-6xl w-full p-6 md:p-10 rounded-[2.5rem] shadow-2xl">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-                <h1 class="text-4xl font-bold uppercase tracking-tighter">Valuator <span class="text-blue-500">v4.4 Apex</span></h1>
+                <h1 class="text-4xl font-bold uppercase tracking-tighter">Valuator <span class="text-blue-500">v4.5 Apex</span></h1>
                 <p class="text-gray-500 text-xs font-bold tracking-widest uppercase">Expert Engine & Knowledge Base • Duy Collector</p>
             </div>
             <div class="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto">
-                <button class="tab-btn active" onclick="openTab(event, 'main')">💎 Định Giá</button>
-                <button class="tab-btn" onclick="openTab(event, 'knowledge')">📚 Tra Cứu Số</button>
+                <button class="tab-btn active" onclick="openTab(event, 'main')">💎 Định Giá Tiền</button>
+                <button class="tab-btn" onclick="openTab(event, 'phone')">📱 Số Điện Thoại</button>
+                <button class="tab-btn" onclick="openTab(event, 'plate')">🚗 Biển Số Xe</button>
+                <button class="tab-btn" onclick="openTab(event, 'knowledge')">📚 Tra Cứu</button>
                 <button class="tab-btn" onclick="openTab(event, 'stats')">📊 Thống Kê</button>
-                <button class="tab-btn" onclick="openTab(event, 'info')">🌐 Tỷ Giá</button>
             </div>
         </div>
 
+        <!-- TAB 1: ĐỊNH GIÁ TIỀN -->
         <div id="main" class="tab-content active">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div class="space-y-6">
@@ -103,9 +107,115 @@
             </div>
         </div>
 
+        <!-- TAB 2: ĐỊNH GIÁ SỐ ĐIỆN THOẠI -->
+        <div id="phone" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Nhà Mạng</label>
+                        <select id="phoneOperator" class="input-style p-4 rounded-2xl w-full font-bold">
+                            <option value="viettel">📡 Viettel (0901-0909, 0935-0936)</option>
+                            <option value="vina">🌐 Vinaphone (0912-0918, 0981-0983)</option>
+                            <option value="mobi">📱 Mobifone (0920-0929, 0989-0990)</option>
+                            <option value="gmobile">💫 Gtel/Gmobile (0919)</option>
+                            <option value="vinaphone_old">🟢 Vinaphone cũ (0911)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Số Điện Thoại (10 Chữ Số)</label>
+                        <input type="text" id="phoneNumber" placeholder="0901234567" maxlength="10" class="input-style p-5 rounded-2xl w-full text-center text-2xl font-bold tracking-[0.2em] text-blue-400">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Tầng Giá</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setPhoneTier('premium', this)" class="grade-btn border border-white/10 p-3 rounded-xl bg-white/5 font-bold text-xs">💎 Premium</button>
+                            <button onclick="setPhoneTier('mid', this)" class="grade-btn border border-white/10 p-3 rounded-xl bg-blue-600 font-bold text-xs">⭐ Mid-Range</button>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="analyzePhone()" class="glow-button flex-1 p-5 rounded-2xl font-bold uppercase">Định Giá</button>
+                        <button onclick="randomPhone()" class="bg-white/5 border border-white/10 p-5 rounded-2xl hover:bg-white/10 transition">🎲</button>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-white/10 rounded-[2rem] p-8 flex flex-col justify-center items-center">
+                    <div id="phoneIdleState" class="text-center">
+                        <div class="w-20 h-20 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mx-auto mb-4"></div>
+                        <p class="text-gray-500 font-bold tracking-widest text-[10px]">READY TO CHECK</p>
+                    </div>
+                    <div id="phoneActiveState" class="hidden w-full text-center space-y-6">
+                        <div id="phoneRankBadge" class="inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-purple-600">Standard</div>
+                        <div class="phone-display" id="phoneDisplay">0901234567</div>
+                        <h2 class="text-4xl font-bold tracking-tighter text-green-400" id="phonePrice">0đ</h2>
+                        <div class="p-4 bg-black/40 rounded-2xl border border-white/5 text-left">
+                            <p class="text-purple-400 font-bold text-lg" id="phoneType">--</p>
+                            <p class="text-gray-500 text-xs mt-2 leading-relaxed" id="phoneNote">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: ĐỊNH GIÁ BIỂN SỐ XE -->
+        <div id="plate" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Tỉnh/Thành Phố</label>
+                        <select id="plateProvince" class="input-style p-4 rounded-2xl w-full font-bold">
+                            <option value="HN">30 - Hà Nội</option>
+                            <option value="HCM">51 - TP Hồ Chí Minh</option>
+                            <option value="HP">36 - Hải Phòng</option>
+                            <option value="DN">43 - Đà Nẵng</option>
+                            <option value="CT">52 - Cần Thơ</option>
+                            <option value="VT">29 - Vĩnh Phúc</option>
+                            <option value="BN">33 - Bắc Ninh</option>
+                            <option value="HD">34 - Hải Dương</option>
+                            <option value="HG">35 - Hưng Yên</option>
+                            <option value="TN">37 - Thanh Hóa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Số Biển (Định Dạng: 12A 34.567)</label>
+                        <input type="text" id="plateNumber" placeholder="12A 34.567" class="input-style p-5 rounded-2xl w-full text-center text-xl font-bold uppercase text-blue-400">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-2 block">Loại Xe</label>
+                        <select id="vehicleType" class="input-style p-4 rounded-2xl w-full font-bold">
+                            <option value="car">🚗 Ô Tô Cá Nhân</option>
+                            <option value="truck">🚚 Xe Tải / Vận Tải</option>
+                            <option value="bus">🚌 Xe Buýt</option>
+                            <option value="motorcycle">🏍️ Xe Máy</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="analyzePlate()" class="glow-button flex-1 p-5 rounded-2xl font-bold uppercase">Định Giá</button>
+                        <button onclick="randomPlate()" class="bg-white/5 border border-white/10 p-5 rounded-2xl hover:bg-white/10 transition">🎲</button>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border border-white/10 rounded-[2rem] p-8 flex flex-col justify-center items-center">
+                    <div id="plateIdleState" class="text-center">
+                        <div class="w-20 h-20 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin mx-auto mb-4"></div>
+                        <p class="text-gray-500 font-bold tracking-widest text-[10px]">READY TO EVALUATE</p>
+                    </div>
+                    <div id="plateActiveState" class="hidden w-full text-center space-y-6">
+                        <div id="plateRankBadge" class="inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-600">Common</div>
+                        <div class="plate-display" id="plateDisplay">30A 12345</div>
+                        <h2 class="text-4xl font-bold tracking-tighter text-green-400" id="platePrice">0đ</h2>
+                        <div class="p-4 bg-black/40 rounded-2xl border border-white/5 text-left">
+                            <p class="text-yellow-400 font-bold text-lg" id="plateType">--</p>
+                            <p class="text-gray-500 text-xs mt-2 leading-relaxed" id="plateNote">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: TRA CỨU KIẾN THỨC -->
         <div id="knowledge" class="tab-content">
-            <h3 class="text-xl font-bold mb-6 text-blue-400">Từ Điển Số Đẹp Dành Cho Dân Sưu Tầm</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[500px] pr-2">
+            <h3 class="text-xl font-bold mb-6 text-blue-400">📚 Từ Điển Sưu Tầm Toàn Bộ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[600px] pr-2">
                 <div class="rare-item">
                     <h4 class="font-bold text-blue-300">👑 Bát Quý (Solid Serial)</h4>
                     <p class="text-xs text-gray-400 mt-1">8 số giống hệt nhau (VD: 88888888). Đây là loại quý hiếm nhất. Tỷ lệ xuất hiện cực thấp, giá trị có thể gấp hàng ngàn lần mệnh giá gốc.</p>
@@ -136,29 +246,43 @@
                     <p class="text-xs text-gray-400 mt-1">Kết thúc bằng các cặp số phong thủy như 68 (Lộc Phát), 86, 79 (Thần Tài lớn), 39 (Thần Tài nhỏ).</p>
                     <span class="text-[10px] text-yellow-500 font-bold">Hệ số: x2-x5</span>
                 </div>
+                <div class="rare-item" style="border-color: #ec4899;">
+                    <h4 class="font-bold text-pink-300">📱 Số Điện Thoại Đẹp</h4>
+                    <p class="text-xs text-gray-400 mt-1">Tứ Quý (0901****77), Ngũ Quý, Luc Quý, hoặc các pattern như 00111111. Các tổ hợp số đặc biệt rất được ưa chuộng.</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Giá: 5tr - 100+ tr VNĐ</span>
+                </div>
+                <div class="rare-item" style="border-color: #f97316;">
+                    <h4 class="font-bold text-orange-300">🚗 Biển Số Xe Đẹp</h4>
+                    <p class="text-xs text-gray-400 mt-1">Biển tứ quý (1111, 8888), biển song song, biển phong thủy. Biển số Hà Nội thường đắt hơn TP HCM.</p>
+                    <span class="text-[10px] text-yellow-500 font-bold">Giá: 50tr - 500+ tr VNĐ</span>
+                </div>
             </div>
         </div>
 
+        <!-- TAB 5: THỐNG KÊ -->
         <div id="stats" class="tab-content">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">Tổng lượt check</p>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">Tổng lượt định giá</p>
                     <h3 id="statTotalCheck" class="text-2xl font-bold">0</h3>
                 </div>
                 <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                    <p class="text-[10px] text-gray-500 font-bold uppercase">Tờ quý nhất (VNĐ)</p>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">Tài Sản Quý Nhất</p>
                     <h3 id="statMax" class="text-2xl font-bold text-yellow-500">0đ</h3>
+                </div>
+                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                    <p class="text-[10px] text-gray-500 font-bold uppercase">Tổng Giá Trị Ước Tính</p>
+                    <h3 id="statTotal" class="text-2xl font-bold text-green-400">0đ</h3>
                 </div>
             </div>
             <div class="h-64"><canvas id="myChart"></canvas></div>
         </div>
-
-        <div id="info" class="tab-content">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="rateGrid"></div>
-        </div>
     </div>
 
-    <div class="max-w-6xl w-full mt-6 grid grid-cols-1 md:grid-cols-3 gap-4" id="historyList"></div>
+    <div class="max-w-6xl w-full mt-6">
+        <h3 class="text-lg font-bold mb-4 text-blue-400">📜 Lịch Sử Định Giá Gần Đây</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="historyList"></div>
+    </div>
 
     <script>
         const rates = { VND: 1, USD: 25400, EUR: 27500, JPY: 165, KRW: 19, CNY: 3500, GBP: 32000, SGD: 19000, THB: 700, LAK: 1.2, KHR: 6, AUD: 16500 };
@@ -177,14 +301,13 @@
             AUD: [5, 10, 20, 50, 100]
         };
 
-        let currentGrade = 1.0, history = [], maxVal = 0, chart = null;
+        let currentGrade = 1.0, currentPhoneTier = 'mid', history = [], maxVal = 0, totalVal = 0, chart = null;
 
+        // ===== TIỀN TỆ =====
         function updateDenominations() {
             const cur = document.getElementById('currency').value;
             const select = document.getElementById('deno');
             select.innerHTML = denos[cur].map(v => `<option value="${v}">${v.toLocaleString()} ${cur}</option>`).join('');
-            const grid = document.getElementById('rateGrid');
-            grid.innerHTML = Object.keys(rates).map(key => `<div class="bg-white/5 p-3 rounded-xl border border-white/5 text-center"><p class="text-gray-500 text-[10px] uppercase">${key}</p><p class="font-bold text-xs">≈ ${rates[key].toLocaleString()} VNĐ</p></div>`).join('');
         }
 
         function setGrade(val, btn) {
@@ -221,23 +344,154 @@
             badge.innerText = mult > 10 ? "Legendary" : (mult > 1 ? "Collectible" : "Common");
             badge.className = mult > 10 ? "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-600" : "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-blue-600";
 
-            if (valueVnd > maxVal) { maxVal = valueVnd; document.getElementById('statMax').innerText = Math.round(maxVal).toLocaleString() + "đ"; }
-            history.unshift({ s, type, price: collectValue, cur, vnd: valueVnd });
-            document.getElementById('statTotalCheck').innerText = history.length;
+            if (valueVnd > maxVal) maxVal = valueVnd;
+            totalVal += valueVnd;
+            history.unshift({ type: 'note', s, name: type, price: collectValue, cur, vnd: valueVnd });
+            updateStats();
             updateHistoryUI();
-            notify("✅ Đã thẩm định!");
+            notify("✅ Đã thẩm định tiền tệ!");
         }
 
+        // ===== SỐ ĐIỆN THOẠI =====
+        function setPhoneTier(tier, btn) {
+            currentPhoneTier = tier;
+            document.querySelectorAll('#phone .grade-btn').forEach(b => { b.classList.remove('bg-blue-600'); b.classList.add('bg-white/5'); });
+            btn.classList.remove('bg-white/5'); btn.classList.add('bg-blue-600');
+        }
+
+        function analyzePhone() {
+            const phoneNum = document.getElementById('phoneNumber').value;
+            if (phoneNum.length !== 10 || isNaN(phoneNum)) { notify("❌ Số điện thoại phải là 10 chữ số!"); return; }
+
+            let mult = 1, type = "Số thường", note = "Số điện thoại bình thường.", basePrice = 500000;
+
+            if (/^(\d)\1{9}$/.test(phoneNum)) { mult = 500; type = "Tứ Quý Trở Lên"; note = "Toàn bộ 10 chữ số giống nhau - VÔ CÙNG HIẾM!"; }
+            else if (/^(\d)\1{3}(.)\2{3}$/.test(phoneNum)) { mult = 100; type = "Lục Quý Hoặc Ngũ Quý"; note = "6 hoặc 5 chữ số giống nhau - Rất quý hiếm."; basePrice = 2000000; }
+            else if (/^(\d)\1{3}/.test(phoneNum) || /(\d)\1{3}$/.test(phoneNum)) { mult = 50; type = "Tứ Quý"; note = "4 chữ số giống nhau - Được ưa chuộng cao."; basePrice = 1000000; }
+            else if (/^(\d)\1{2}/.test(phoneNum) || /(\d)\1{2}$/.test(phoneNum)) { mult = 10; type = "Tam Quý"; note = "3 chữ số liên tiếp giống nhau - Khá đẹp."; basePrice = 800000; }
+            else if (phoneNum === phoneNum.split('').reverse().join('')) { mult = 15; type = "Số Soi Gương"; note = "Đối xứng - Mang tính thẩm mỹ cao."; basePrice = 1500000; }
+            else if (/^(0)\1{1}/.test(phoneNum.slice(0, 3))) { mult = 5; type = "Double Zero"; note = "Bắt đầu 00 - Khá phổ biến nhưng còn giá trị."; basePrice = 600000; }
+            else if (/(68|86|79|39|99|88|77)$/.test(phoneNum.slice(-2))) { mult = 3; type = "Kết Thúc May Mắn"; note = "Phong thủy tốt - Đẹp mắt."; basePrice = 700000; }
+
+            const priceMultiplier = currentPhoneTier === 'premium' ? 1.5 : 1;
+            const finalPrice = basePrice * mult * priceMultiplier;
+
+            document.getElementById('phoneIdleState').classList.add('hidden');
+            document.getElementById('phoneActiveState').classList.remove('hidden');
+            document.getElementById('phoneDisplay').innerText = phoneNum.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+            document.getElementById('phonePrice').innerText = Math.round(finalPrice).toLocaleString() + "đ";
+            document.getElementById('phoneType').innerText = type;
+            document.getElementById('phoneNote').innerText = note;
+
+            const badge = document.getElementById('phoneRankBadge');
+            badge.innerText = mult > 50 ? "💎 VIP+" : (mult > 10 ? "⭐ Premium" : "✨ Good");
+            badge.className = mult > 50 ? "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-600" : "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-purple-600";
+
+            if (finalPrice > maxVal) maxVal = finalPrice;
+            totalVal += finalPrice;
+            history.unshift({ type: 'phone', name: phoneNum, detail: type, price: finalPrice, vnd: finalPrice });
+            updateStats();
+            updateHistoryUI();
+            notify("✅ Đã định giá số điện thoại!");
+        }
+
+        // ===== BIỂN SỐ XE =====
+        function analyzePlate() {
+            const plateNum = document.getElementById('plateNumber').value.toUpperCase();
+            const province = document.getElementById('plateProvince').value;
+            const vehicleType = document.getElementById('vehicleType').value;
+            
+            if (!plateNum || plateNum.length < 5) { notify("❌ Vui lòng nhập biển số hợp lệ!"); return; }
+
+            let mult = 1, type = "Biển số thường", note = "Giá trị giao dịch bình thường.", basePrice = 5000000;
+
+            // Phân tích biển số
+            if (/(\d)\1{3}/.test(plateNum)) { mult = 100; type = "Tứ Quý"; note = "4 chữ số giống nhau - Rất quý hiếm!"; basePrice = 50000000; }
+            else if (/(\d)\1{2}/.test(plateNum)) { mult = 20; type = "Tam Quý"; note = "3 chữ số giống nhau - Khá đẹp."; basePrice = 15000000; }
+            else if (plateNum.includes("888") || plateNum.includes("888")) { mult = 50; type = "May Mắn (888)"; note = "Số 8 may mắn - Được ưa chuộng."; basePrice = 30000000; }
+            else if (plateNum.includes("666")) { mult = 40; type = "Phát Tài (666)"; note = "Số 6 phát tài - Được ưa chuộng."; basePrice = 25000000; }
+            else if (/(\d)\1{1}/.test(plateNum.slice(-2))) { mult = 5; type = "Double Đuôi"; note = "2 chữ số giống nhau ở đuôi."; basePrice = 8000000; }
+
+            // Nhân thêm giá trị tỉnh
+            const provinceMultiplier = province === "HN" ? 1.5 : (province === "HCM" ? 1.3 : 1);
+            const vehicleMultiplier = vehicleType === "car" ? 1.2 : 1;
+            const finalPrice = basePrice * mult * provinceMultiplier * vehicleMultiplier;
+
+            document.getElementById('plateIdleState').classList.add('hidden');
+            document.getElementById('plateActiveState').classList.remove('hidden');
+            document.getElementById('plateDisplay').innerText = plateNum;
+            document.getElementById('platePrice').innerText = Math.round(finalPrice).toLocaleString() + "đ";
+            document.getElementById('plateType').innerText = type;
+            document.getElementById('plateNote').innerText = note + ` | ${province} | ${vehicleType === 'car' ? 'Ô tô' : vehicleType === 'truck' ? 'Xe tải' : vehicleType === 'bus' ? 'Xe buýt' : 'Xe máy'}`;
+
+            const badge = document.getElementById('plateRankBadge');
+            badge.innerText = mult > 20 ? "🔥 LEGENDARY" : (mult > 5 ? "⭐ PREMIUM" : "✨ GOOD");
+            badge.className = mult > 20 ? "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-orange-600" : "inline-block px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-yellow-600";
+
+            if (finalPrice > maxVal) maxVal = finalPrice;
+            totalVal += finalPrice;
+            history.unshift({ type: 'plate', name: plateNum, detail: type, price: finalPrice, vnd: finalPrice });
+            updateStats();
+            updateHistoryUI();
+            notify("✅ Đã định giá biển số xe!");
+        }
+
+        // ===== UTILITY FUNCTIONS =====
         function isValidDate(s) {
             const d = parseInt(s.slice(0, 2)), m = parseInt(s.slice(2, 4)), y = parseInt(s.slice(4));
             return !(m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2026);
         }
 
-        function updateHistoryUI() {
-            document.getElementById('historyList').innerHTML = history.slice(0, 6).map(h => `<div class="glass-card p-4 rounded-2xl border border-white/5"> <div class="flex justify-between items-start"> <span class="text-[10px] text-gray-500 font-bold uppercase">${h.cur}</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-blue-400 font-bold">${h.s}</span> </div> <p class="text-xs font-bold mt-2">${h.type}</p> <p class="text-green-400 font-bold mt-1">${Math.round(h.price).toLocaleString()} ${h.cur}</p> </div>`).join('');
+        function randomSerial() { 
+            document.getElementById('serial').value = Math.floor(Math.random() * 90000000 + 10000000).toString(); 
+            analyze(); 
         }
 
-        function notify(msg) { const n = document.getElementById('notification'); n.innerText = msg; n.style.display = 'block'; setTimeout(() => n.style.display = 'none', 3000); }
+        function randomPhone() {
+            const operators = ['0901', '0902', '0912', '0913', '0920', '0921', '0935', '0936'];
+            const op = operators[Math.floor(Math.random() * operators.length)];
+            const remaining = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+            document.getElementById('phoneNumber').value = op + remaining;
+            analyzePhone();
+        }
+
+        function randomPlate() {
+            const provinces = ['HN', 'HCM', 'HP', 'DN', 'CT'];
+            const prov = provinces[Math.floor(Math.random() * provinces.length)];
+            document.getElementById('plateProvince').value = prov;
+            const num = Math.floor(Math.random() * 10000).toString().padStart(5, '0');
+            document.getElementById('plateNumber').value = (Math.floor(Math.random() * 99) + 1) + 'A ' + num.slice(0, 2) + '.' + num.slice(2);
+            analyzePlate();
+        }
+
+        function updateStats() {
+            document.getElementById('statTotalCheck').innerText = history.length;
+            document.getElementById('statMax').innerText = Math.round(maxVal).toLocaleString() + "đ";
+            document.getElementById('statTotal').innerText = Math.round(totalVal).toLocaleString() + "đ";
+        }
+
+        function updateHistoryUI() {
+            const historyHTML = history.slice(0, 6).map((h, i) => {
+                const icon = h.type === 'phone' ? '📱' : (h.type === 'plate' ? '🚗' : '💎');
+                const displayName = h.type === 'note' ? h.s : h.name;
+                return `<div class="glass-card p-4 rounded-2xl border border-white/5">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] text-gray-500 font-bold uppercase">${icon}</span>
+                        <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded text-blue-400 font-bold">${displayName}</span>
+                    </div>
+                    <p class="text-xs font-bold mt-2 text-purple-400">${h.detail || h.name}</p>
+                    <p class="text-green-400 font-bold mt-1">${Math.round(h.price).toLocaleString()} ${h.cur || 'đ'}</p>
+                </div>`;
+            }).join('');
+            document.getElementById('historyList').innerHTML = historyHTML;
+        }
+
+        function notify(msg) { 
+            const n = document.getElementById('notification'); 
+            n.innerText = msg; 
+            n.style.display = 'block'; 
+            setTimeout(() => n.style.display = 'none', 3000); 
+        }
 
         function openTab(evt, name) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -247,12 +501,26 @@
             if(name === 'stats') initChart();
         }
 
-        function randomSerial() { document.getElementById('serial').value = Math.floor(Math.random() * 90000000 + 10000000).toString(); analyze(); }
-
         function initChart() {
             const ctx = document.getElementById('myChart').getContext('2d');
             if (chart) chart.destroy();
-            chart = new Chart(ctx, { type: 'line', data: { labels: history.map((_, i) => i + 1).reverse(), datasets: [{ label: 'Giá trị (VNĐ)', data: history.map(h => h.vnd).reverse(), borderColor: '#3b82f6', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
+            const chartData = history.map(h => h.vnd).reverse();
+            const chartLabels = history.map((_, i) => `#${i + 1}`).reverse();
+            chart = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: chartLabels, 
+                    datasets: [{ 
+                        label: 'Giá trị định giá (VNĐ)', 
+                        data: chartData, 
+                        borderColor: '#3b82f6', 
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }] 
+                }, 
+                options: { maintainAspectRatio: false } 
+            });
         }
 
         updateDenominations();
